@@ -58,28 +58,6 @@ services:
       - vibescan-network
     restart: unless-stopped
 
-  # Trivy scanner
-  trivy:
-    image: aquasec/trivy:latest
-    container_name: vibescan-trivy
-    entrypoint: ["/bin/sh", "-c"]
-    command: ["sleep infinity"]
-    networks:
-      - vibescan-network
-    volumes:
-      - trivy_cache:/root/.cache/trivy
-    restart: unless-stopped
-
-  # Gitleaks scanner
-  gitleaks:
-    image: zricethezav/gitleaks:latest
-    container_name: vibescan-gitleaks
-    entrypoint: ["/bin/sh", "-c"]
-    command: ["sleep infinity"]
-    networks:
-      - vibescan-network
-    restart: unless-stopped
-
   # Backend API
   backend:
     build:
@@ -109,8 +87,6 @@ services:
       FRONTEND_URL: https://${DOMAIN}
       NUCLEI_CONTAINER: nuclei
       ZAP_CONTAINER: zap
-      TRIVY_CONTAINER: trivy
-      GITLEAKS_CONTAINER: gitleaks
     depends_on:
       postgres:
         condition: service_healthy
@@ -120,29 +96,10 @@ services:
         condition: service_started
       zap:
         condition: service_started
-      trivy:
-        condition: service_started
-      gitleaks:
-        condition: service_started
     networks:
       - vibescan-network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    restart: unless-stopped
-
-  # Frontend (Next.js)
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: vibescan-frontend
-    environment:
-      NODE_ENV: production
-      NEXT_PUBLIC_API_URL: https://${DOMAIN}/api
-    depends_on:
-      - backend
-    networks:
-      - vibescan-network
     restart: unless-stopped
 
   # Nginx Reverse Proxy
@@ -157,7 +114,6 @@ services:
     environment:
       DOMAIN: ${DOMAIN}
     depends_on:
-      - frontend
       - backend
     volumes:
       - ./nginx/ssl:/etc/letsencrypt
@@ -182,7 +138,6 @@ volumes:
   postgres_data:
   redis_data:
   nuclei_templates:
-  trivy_cache:
 
 networks:
   vibescan-network:
