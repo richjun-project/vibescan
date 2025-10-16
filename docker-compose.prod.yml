@@ -58,6 +58,8 @@ services:
     container_name: vibescan-zap
     entrypoint: ["/bin/sh", "-c"]
     command: ["sleep infinity"]
+    healthcheck:
+      disable: true
     networks:
       - vibescan-network
     restart: unless-stopped
