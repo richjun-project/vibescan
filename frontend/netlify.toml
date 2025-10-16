@@ -1,7 +1,9 @@
-# Netlify 배포 설정
 [build]
   base = "frontend"
   command = "npm run build"
 
 [build.environment]
   NODE_VERSION = "20"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
