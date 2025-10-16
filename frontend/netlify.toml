@@ -6,16 +6,13 @@
   # 빌드 명령어
   command = "npm run build"
 
-  # 빌드 결과물 디렉토리 (base 기준 상대경로)
-  publish = ".next"
+  # 빌드 결과물 디렉토리는 @netlify/plugin-nextjs가 자동으로 처리
+  # publish = ".next"
 
 # 환경변수 (Netlify UI에서도 설정 가능)
 [build.environment]
   # Node.js 버전
   NODE_VERSION = "20"
-
-  # Next.js standalone 모드 활성화
-  NEXT_PRIVATE_STANDALONE = "true"
 
   # 프로덕션 모드
   NODE_ENV = "production"
