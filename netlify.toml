@@ -4,6 +4,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  NEXT_PUBLIC_API_URL = "https://vibescan.kr/api"
+  NEXT_PUBLIC_BACKEND_URL = "https://vibescan.kr/api"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
