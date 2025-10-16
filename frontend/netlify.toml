@@ -9,11 +9,11 @@
   # 빌드 결과물 디렉토리 (base 기준 상대경로)
   publish = ".next"
 
-  # Node.js 버전
-  environment = { NODE_VERSION = "20" }
-
 # 환경변수 (Netlify UI에서도 설정 가능)
 [build.environment]
+  # Node.js 버전
+  NODE_VERSION = "20"
+
   # Next.js standalone 모드 활성화
   NEXT_PRIVATE_STANDALONE = "true"
 
