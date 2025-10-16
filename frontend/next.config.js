@@ -3,8 +3,6 @@ const path = require('path')
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Enable standalone output for Docker (disabled for Netlify)
-  // output: 'standalone',
   // Allow cross-origin requests from local network for development
   allowedDevOrigins: [
     '192.168.45.77',
