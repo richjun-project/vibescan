@@ -1,6 +1,7 @@
 import { Controller, Post, Get, Param, Body, UseGuards, Request, Patch, Res, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { IsString, IsOptional, IsBoolean } from 'class-validator';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ScanService } from './scan.service';
 import { PDFService } from '../../services/pdf.service';
@@ -23,6 +24,7 @@ export class ScanController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests per minute
   async createScan(@Request() req, @Body() dto: CreateScanDto) {
     return this.scanService.createScan(req.user, dto.domain, dto.repositoryUrl);
   }

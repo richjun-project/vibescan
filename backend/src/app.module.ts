@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { getDatabaseConfig } from './config/database.config';
 
 import { AuthModule } from './modules/auth/auth.module';
@@ -22,6 +24,14 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
 
     // Cron jobs
     ScheduleModule.forRoot(),
+
+    // Rate limiting
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1 minute
+        limit: 10, // 10 requests per minute for scan creation
+      },
+    ]),
 
     // Database
     MikroOrmModule.forRootAsync({
@@ -48,6 +58,12 @@ import { SubscriptionModule } from './modules/subscription/subscription.module';
     RankingModule,
     PaymentModule,
     SubscriptionModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

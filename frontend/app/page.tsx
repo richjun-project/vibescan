@@ -117,7 +117,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="bg-white/95 backdrop-blur-sm rounded-3xl px-8 py-12 md:px-12 md:py-16 shadow-2xl">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold text-gray-900 mb-6 tracking-tight leading-tight">
-              보안 점검,<br />이제는 간단하게
+              웹 보안 점검,<br />이제는 간단하게
             </h1>
 
             <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
