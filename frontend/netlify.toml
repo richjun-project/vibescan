@@ -1,49 +1,14 @@
 # Netlify 배포 설정
 [build]
-  # Base directory - 모노레포에서 frontend 폴더만 사용
   base = "frontend"
-
-  # 빌드 명령어
   command = "npm run build"
+  publish = ".next"
 
-# 환경변수 (Netlify UI에서도 설정 가능)
 [build.environment]
-  # Node.js 버전
   NODE_VERSION = "20"
-
-  # 프로덕션 모드
   NODE_ENV = "production"
-
-  # API URL (배포 후 GCP Cloud Run URL로 변경 필요)
-  # 예: NEXT_PUBLIC_API_URL = "https://your-backend.run.app/api"
   NEXT_PUBLIC_API_URL = "https://your-backend-url.run.app/api"
 
-# 리다이렉트 규칙 - API 요청을 백엔드로 프록시
-[[redirects]]
-  from = "/api/*"
-  to = "https://your-backend-url.run.app/api/:splat"
-  status = 200
-  force = true
-
-# 헤더 설정
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-
-[[headers]]
-  for = "/_next/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Next.js 플러그인
+# Next.js 플러그인이 자동으로 처리
 [[plugins]]
   package = "@netlify/plugin-nextjs"
