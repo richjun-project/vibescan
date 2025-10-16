@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - "5433:5433"  # 호스트에서 접근 가능하도록 포트 노출
+      - "5433:5432"  # 호스트에서 접근 가능하도록 포트 노출
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
