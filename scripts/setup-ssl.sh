@@ -65,7 +65,8 @@ docker-compose -f docker-compose.prod.yml run --rm certbot certonly \
     --email $EMAIL \
     --agree-tos \
     --no-eff-email \
-    --force-renewal
+    --non-interactive \
+    --verbose
 
 if [ $? -eq 0 ]; then
     echo ""
