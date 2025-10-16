@@ -1,9 +1,12 @@
 # Netlify 배포 설정
 [build]
+  # Base directory - 모노레포에서 frontend 폴더만 사용
+  base = "frontend"
+
   # 빌드 명령어
   command = "npm run build"
 
-  # 빌드 결과물 디렉토리 (.next/standalone 모드 사용)
+  # 빌드 결과물 디렉토리 (base 기준 상대경로)
   publish = ".next"
 
   # Node.js 버전
