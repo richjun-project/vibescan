@@ -9,6 +9,8 @@ services:
       POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "5432:5432"  # 호스트에서 접근 가능하도록 포트 노출
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -25,6 +27,8 @@ services:
     image: redis:7-alpine
     container_name: vibescan-redis
     command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"  # 호스트에서 접근 가능하도록 포트 노출
     volumes:
       - redis_data:/data
     healthcheck:
@@ -58,49 +62,9 @@ services:
       - vibescan-network
     restart: unless-stopped
 
-  # Backend API
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: vibescan-backend
-    environment:
-      NODE_ENV: production
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
-      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      TOSS_SECRET_KEY: ${TOSS_SECRET_KEY}
-      TOSS_CLIENT_KEY: ${TOSS_CLIENT_KEY}
-      FRONTEND_URL: https://${DOMAIN}
-      NUCLEI_CONTAINER: nuclei
-      ZAP_CONTAINER: zap
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      nuclei:
-        condition: service_started
-      zap:
-        condition: service_started
-    networks:
-      - vibescan-network
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    restart: unless-stopped
+  # Backend API - 서버에서 직접 실행 (Docker 제외)
+  # 백엔드는 ~/vibescan/backend 폴더에서 직접 실행하세요
+  # cd ~/vibescan/backend && npm run start:prod
 
   # Nginx Reverse Proxy
   nginx:
@@ -113,8 +77,6 @@ services:
       - "443:443"
     environment:
       DOMAIN: ${DOMAIN}
-    depends_on:
-      - backend
     volumes:
       - ./nginx/ssl:/etc/letsencrypt
       - ./nginx/certbot-www:/var/www/certbot
