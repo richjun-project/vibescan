@@ -49,7 +49,18 @@ fi
 
 echo ""
 echo "🔧 nginx 및 certbot 컨테이너 시작 중..."
-docker-compose -f docker-compose.prod.yml up -d nginx certbot
+
+# Docker Compose 명령어 확인 (V1: docker-compose, V2: docker compose)
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+elif docker compose version &> /dev/null; then
+    DOCKER_COMPOSE="docker compose"
+else
+    echo "❌ Error: Docker Compose가 설치되지 않았습니다."
+    exit 1
+fi
+
+$DOCKER_COMPOSE -f docker-compose.prod.yml up -d nginx certbot
 
 echo ""
 echo "⏳ nginx가 완전히 시작될 때까지 5초 대기..."
@@ -57,7 +68,7 @@ sleep 5
 
 echo ""
 echo "🔐 SSL 인증서 발급 시작..."
-docker-compose -f docker-compose.prod.yml run --rm certbot certonly \
+$DOCKER_COMPOSE -f docker-compose.prod.yml run --rm certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
     -d $DOMAIN \
@@ -73,7 +84,7 @@ if [ $? -eq 0 ]; then
     echo "✅ SSL 인증서가 성공적으로 발급되었습니다!"
     echo ""
     echo "🔄 nginx 재시작 중..."
-    docker-compose -f docker-compose.prod.yml restart nginx
+    $DOCKER_COMPOSE -f docker-compose.prod.yml restart nginx
 
     echo ""
     echo "=================================="
@@ -94,7 +105,7 @@ else
     echo "     - A 레코드: www.$DOMAIN -> 서버 IP"
     echo "  2. 방화벽에서 80, 443 포트가 열려있는지 확인하세요"
     echo "  3. nginx 로그를 확인하세요:"
-    echo "     docker-compose -f docker-compose.prod.yml logs nginx"
+    echo "     $DOCKER_COMPOSE -f docker-compose.prod.yml logs nginx"
     echo ""
     exit 1
 fi
