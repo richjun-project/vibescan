@@ -18,9 +18,8 @@
   # 예: NEXT_PUBLIC_API_URL = "https://your-backend.run.app/api"
   NEXT_PUBLIC_API_URL = "https://your-backend-url.run.app/api"
 
-# 리다이렉트 및 리라이트 규칙
+# 리다이렉트 규칙 - API 요청을 백엔드로 프록시
 [[redirects]]
-  # API 요청을 백엔드로 프록시 (optional, CORS 대신 사용 가능)
   from = "/api/*"
   to = "https://your-backend-url.run.app/api/:splat"
   status = 200
@@ -45,6 +44,6 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# 플러그인 설정
+# Next.js 플러그인
 [[plugins]]
   package = "@netlify/plugin-nextjs"
