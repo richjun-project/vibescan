@@ -1,0 +1,10 @@
+# Nuclei Scanner Dockerfile
+FROM projectdiscovery/nuclei:latest
+
+# Update templates
+RUN nuclei -update-templates
+
+WORKDIR /scan
+
+# Default command
+ENTRYPOINT ["nuclei"]

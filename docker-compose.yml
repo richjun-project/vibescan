@@ -1,0 +1,121 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vibescan-postgres
+    environment:
+      POSTGRES_DB: vibescan
+      POSTGRES_USER: vibescan
+      POSTGRES_PASSWORD: vibescan_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vibescan"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vibescan-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: vibescan-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vibescan-network
+
+  # Nuclei scanner for OWASP Top 10 vulnerabilities
+  nuclei:
+    image: projectdiscovery/nuclei:latest
+    container_name: vibescan-nuclei
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["sleep infinity"]
+    networks:
+      - vibescan-network
+    volumes:
+      - nuclei_templates:/root/nuclei-templates
+
+  # OWASP ZAP scanner for deep web application security testing
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    container_name: vibescan-zap
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["sleep infinity"]  # Keep container running, execute scans via docker exec
+    networks:
+      - vibescan-network
+
+  # Trivy scanner for dependency vulnerabilities
+#  trivy:
+#    image: aquasec/trivy:latest
+#    container_name: vibescan-trivy
+#    entrypoint: ["/bin/sh", "-c"]
+#    command: ["sleep infinity"]
+#    networks:
+#      - vibescan-network
+#    volumes:
+#      - trivy_cache:/root/.cache/trivy
+#
+#  # Gitleaks scanner for secret detection
+#  gitleaks:
+#    image: zricethezav/gitleaks:latest
+#    container_name: vibescan-gitleaks
+#    entrypoint: ["/bin/sh", "-c"]
+#    command: ["sleep infinity"]
+#    networks:
+#      - vibescan-network
+
+  # Backend API (optional - for full containerized deployment)
+  # Uncomment to run backend in Docker
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   container_name: vibescan-backend
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     DATABASE_HOST: postgres
+  #     DATABASE_PORT: 5432
+  #     DATABASE_USER: vibescan
+  #     DATABASE_PASSWORD: vibescan_password
+  #     DATABASE_NAME: vibescan
+  #     REDIS_HOST: redis
+  #     REDIS_PORT: 6379
+  #     JWT_SECRET: your-secret-key-change-in-production
+  #     NUCLEI_CONTAINER: nuclei
+  #     TRIVY_CONTAINER: trivy
+  #     GITLEAKS_CONTAINER: gitleaks
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #     nuclei:
+  #       condition: service_started
+  #     trivy:
+  #       condition: service_started
+  #     gitleaks:
+  #       condition: service_started
+  #   networks:
+  #     - vibescan-network
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock  # For Docker-in-Docker if needed
+
+volumes:
+  postgres_data:
+  redis_data:
+  nuclei_templates:
+  trivy_cache:
+
+networks:
+  vibescan-network:
+    driver: bridge

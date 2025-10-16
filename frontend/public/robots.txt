@@ -1,0 +1,13 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+Allow: /en
+
+# Disallow private/sensitive pages
+Disallow: /dashboard
+Disallow: /scans/
+Disallow: /api/
+Disallow: /payment/
+
+# Sitemap location
+Sitemap: https://vibescan.com/sitemap.xml

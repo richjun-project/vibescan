@@ -1,0 +1,251 @@
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import Stripe from 'stripe';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
+import { User } from '../../entities/user.entity';
+import { UserCredit } from '../../entities/user-credit.entity';
+import { Subscription, SubscriptionStatus } from '../../entities/subscription.entity';
+
+@Injectable()
+export class StripeService {
+  private stripe: Stripe;
+
+  constructor(
+    private configService: ConfigService,
+    @InjectRepository(User)
+    private userRepository: EntityRepository<User>,
+    @InjectRepository(UserCredit)
+    private userCreditRepository: EntityRepository<UserCredit>,
+    @InjectRepository(Subscription)
+    private subscriptionRepository: EntityRepository<Subscription>,
+    private em: EntityManager,
+  ) {
+    const secretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
+    if (!secretKey) {
+      console.warn('STRIPE_SECRET_KEY not set. Payment features will be disabled.');
+    }
+    this.stripe = new Stripe(secretKey || 'sk_test_dummy', {
+      apiVersion: '2025-09-30.clover',
+    });
+  }
+
+  // Price IDs - Should be set in environment variables
+  private readonly PRICE_IDS = {
+    starter: this.configService.get<string>('STRIPE_PRICE_STARTER'),
+    pro: this.configService.get<string>('STRIPE_PRICE_PRO'),
+    enterprise: this.configService.get<string>('STRIPE_PRICE_ENTERPRISE'),
+  };
+
+  async createCheckoutSession(userId: number, scanCount: number = 1) {
+    const user = await this.userRepository.findOneOrFail({ id: userId });
+
+    // Create or get Stripe customer
+    let customerId = user.stripeCustomerId;
+    if (!customerId) {
+      const customer = await this.stripe.customers.create({
+        email: user.email,
+        metadata: {
+          userId: user.id.toString(),
+        },
+      });
+      customerId = customer.id;
+      user.stripeCustomerId = customerId;
+      await this.em.flush();
+    }
+
+    // Create one-time payment checkout session for detailed scan reports
+    const session = await this.stripe.checkout.sessions.create({
+      customer: customerId,
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'krw',
+            product_data: {
+              name: '보안 스캔 상세 리포트',
+              description: `${scanCount}회 스캔 상세 리포트`,
+            },
+            unit_amount: 9900, // ₩9,900
+          },
+          quantity: scanCount,
+        },
+      ],
+      mode: 'payment', // One-time payment, not subscription
+      success_url: `${this.configService.get('FRONTEND_URL')}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${this.configService.get('FRONTEND_URL')}/pricing`,
+      metadata: {
+        userId: user.id.toString(),
+        scanCount: scanCount.toString(),
+      },
+    });
+
+    return {
+      sessionId: session.id,
+      url: session.url,
+    };
+  }
+
+  async createPortalSession(userId: number) {
+    const user = await this.userRepository.findOneOrFail({ id: userId });
+
+    if (!user.stripeCustomerId) {
+      throw new Error('No Stripe customer found');
+    }
+
+    const session = await this.stripe.billingPortal.sessions.create({
+      customer: user.stripeCustomerId,
+      return_url: `${this.configService.get('FRONTEND_URL')}/dashboard`,
+    });
+
+    return {
+      url: session.url,
+    };
+  }
+
+  async handleWebhook(signature: string, body: Buffer) {
+    const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
+
+    let event: Stripe.Event;
+
+    try {
+      event = this.stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    } catch (err) {
+      throw new Error(`Webhook signature verification failed: ${err.message}`);
+    }
+
+    // Handle the event
+    switch (event.type) {
+      case 'checkout.session.completed':
+        await this.handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+        break;
+
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated':
+        await this.handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+        break;
+
+      case 'customer.subscription.deleted':
+        await this.handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+        break;
+
+      case 'invoice.payment_succeeded':
+        await this.handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
+        break;
+
+      case 'invoice.payment_failed':
+        await this.handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+        break;
+
+      default:
+        console.log(`Unhandled event type: ${event.type}`);
+    }
+
+    return { received: true };
+  }
+
+  private async handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+    const userId = parseInt(session.metadata.userId);
+    const scanCount = parseInt(session.metadata.scanCount || '1');
+
+    const user = await this.userRepository.findOneOrFail({ id: userId }, { populate: ['credit'] });
+
+    // Add paid scan credits to user
+    user.credit.addPaidScans(scanCount);
+
+    await this.em.flush();
+
+    console.log(`✅ User ${user.email} purchased ${scanCount} detailed scan(s). Total remaining: ${user.credit.paidScansRemaining}`);
+  }
+
+  private async handleSubscriptionUpdated(stripeSubscription: Stripe.Subscription) {
+    const subscription = await this.subscriptionRepository.findOne({
+      stripeSubscriptionId: stripeSubscription.id,
+    });
+
+    if (subscription) {
+      subscription.status = stripeSubscription.status as SubscriptionStatus;
+      subscription.currentPeriodStart = new Date((stripeSubscription as any).current_period_start * 1000);
+      subscription.currentPeriodEnd = new Date((stripeSubscription as any).current_period_end * 1000);
+      subscription.cancelAtPeriodEnd = (stripeSubscription as any).cancel_at_period_end;
+
+      await this.em.flush();
+    }
+  }
+
+  private async handleSubscriptionDeleted(stripeSubscription: Stripe.Subscription) {
+    const subscription = await this.subscriptionRepository.findOne({
+      stripeSubscriptionId: stripeSubscription.id,
+    }, { populate: ['user'] });
+
+    if (subscription) {
+      subscription.status = SubscriptionStatus.CANCELED;
+
+      await this.em.flush();
+    }
+  }
+
+  private async handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
+    // Handle successful payment
+    console.log('Payment succeeded for invoice:', invoice.id);
+  }
+
+  private async handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+    const subscriptionId = (invoice as any).subscription;
+    if (typeof subscriptionId === 'string') {
+      const subscription = await this.subscriptionRepository.findOne({
+        stripeSubscriptionId: subscriptionId,
+      }, { populate: ['user'] });
+
+      if (subscription) {
+        subscription.status = SubscriptionStatus.PAST_DUE;
+        await this.em.flush();
+      }
+    }
+  }
+
+  async getPrices() {
+    return {
+      starter: {
+        id: this.PRICE_IDS.starter,
+        name: 'Starter',
+        price: 29000,
+        currency: 'KRW',
+        interval: 'month',
+        features: [
+          '월 5회 스캔',
+          '모든 Free 기능',
+          'AI 요약',
+          'PDF 리포트',
+        ],
+      },
+      pro: {
+        id: this.PRICE_IDS.pro,
+        name: 'Pro',
+        price: 99000,
+        currency: 'KRW',
+        interval: 'month',
+        features: [
+          '무제한 스캔',
+          '모든 Starter 기능',
+          'AI Fix Guide',
+          'CI/CD 연동',
+          '우선 지원',
+        ],
+      },
+      enterprise: {
+        id: this.PRICE_IDS.enterprise,
+        name: 'Enterprise',
+        price: null,
+        currency: 'KRW',
+        interval: 'month',
+        features: [
+          '모든 Pro 기능',
+          '전담 CSM',
+          '온프레미스',
+          'SLA 보장',
+        ],
+      },
+    };
+  }
+}

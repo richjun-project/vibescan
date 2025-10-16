@@ -1,0 +1,285 @@
+{
+  "hero": {
+    "title": "엔터프라이즈급 보안 스캔, 무료로 경험하세요",
+    "subtitle": "8,000개 이상의 취약점 템플릿과 AI 기반 분석으로 웹사이트를 종합 진단합니다",
+    "cta": "무료로 스캔 시작하기"
+  },
+  "mainFeatures": [
+    {
+      "icon": "🎯",
+      "title": "8,000+ 취약점 템플릿",
+      "description": "Nuclei 엔진 기반으로 OWASP Top 10, CVE, 잘못된 설정 등을 자동 탐지합니다",
+      "highlight": "업계 최고 수준"
+    },
+    {
+      "icon": "🤖",
+      "title": "AI 기반 취약점 분석",
+      "description": "발견된 취약점을 AI가 자동으로 설명하고 수정 방법을 제시합니다",
+      "highlight": "Claude AI 탑재"
+    },
+    {
+      "icon": "⚡",
+      "title": "실시간 진행 상황",
+      "description": "WebSocket 기반으로 스캔 진행률과 각 단계를 실시간으로 확인할 수 있습니다",
+      "highlight": "15분 내 완료"
+    },
+    {
+      "icon": "🔍",
+      "title": "중복 없는 정확한 결과",
+      "description": "6개 스캐너의 중복 탐지를 자동으로 제거하여 깔끔한 보고서를 제공합니다",
+      "highlight": "스마트 필터링"
+    }
+  ],
+  "scanners": [
+    {
+      "name": "Nuclei Scanner",
+      "icon": "🚀",
+      "description": "8,000개 이상의 템플릿으로 CVE, OWASP, 설정 오류를 탐지",
+      "coverage": [
+        "OWASP Top 10",
+        "CVE 취약점",
+        "노출된 관리자 페이지",
+        "잘못된 보안 설정",
+        "알려진 취약점 DB"
+      ],
+      "badge": "업계 표준",
+      "performance": "8,000+ 템플릿"
+    },
+    {
+      "name": "OWASP ZAP",
+      "icon": "🛡️",
+      "description": "OWASP 공식 도구로 웹 애플리케이션 보안 취약점 스캔",
+      "coverage": [
+        "XSS (크로스사이트 스크립팅)",
+        "SQL Injection",
+        "CSRF 취약점",
+        "보안 헤더 누락",
+        "취약한 인증/세션"
+      ],
+      "badge": "OWASP 공식",
+      "performance": "Passive + Active"
+    },
+    {
+      "name": "Security Headers",
+      "icon": "🔐",
+      "description": "HTTP 보안 헤더를 심층 분석하고 설정 오류를 찾아냅니다",
+      "coverage": [
+        "HSTS, CSP, X-Frame-Options",
+        "CSP unsafe-inline 감지",
+        "CORS 위험 설정 분석",
+        "Cookie 보안 플래그",
+        "Referrer-Policy, Permissions-Policy"
+      ],
+      "badge": "심층 분석",
+      "performance": "14개 헤더 검사"
+    },
+    {
+      "name": "SSL/TLS Scanner",
+      "icon": "🔒",
+      "description": "인증서와 암호화 프로토콜의 보안을 검증합니다",
+      "coverage": [
+        "인증서 만료 (30일 전 경고)",
+        "Self-signed 인증서 감지",
+        "약한 프로토콜 (TLS 1.0/1.1)",
+        "SSLv2/v3 취약점",
+        "인증서 체인 검증"
+      ],
+      "badge": "필수 검사",
+      "performance": "2초 내 완료"
+    },
+    {
+      "name": "Port Scanner",
+      "icon": "🌐",
+      "description": "102개 주요 포트를 스캔하고 위험도를 평가합니다",
+      "coverage": [
+        "Critical: Telnet, Docker API",
+        "High: MySQL, PostgreSQL, Redis",
+        "Medium: RDP, SNMP, VNC",
+        "알려진 CVE 매핑",
+        "Banner Grabbing (버전 감지)"
+      ],
+      "badge": "102개 포트",
+      "performance": "3초 내 완료"
+    },
+    {
+      "name": "Web Reconnaissance",
+      "icon": "🔎",
+      "description": "서브도메인, 기술 스택, DNS 보안을 종합 조사합니다",
+      "coverage": [
+        "15개 common 서브도메인 열거",
+        "기술 스택 감지 (React, Vue, WordPress...)",
+        "DNS 보안 (SPF, DMARC)",
+        "robots.txt 분석",
+        "오래된 기술 감지"
+      ],
+      "badge": "정보 수집",
+      "performance": "5초 내 완료"
+    }
+  ],
+  "advantages": [
+    {
+      "category": "포괄성",
+      "title": "6개 스캐너 = 완벽한 커버리지",
+      "items": [
+        "인프라부터 애플리케이션까지 전방위 검사",
+        "Nuclei 8,000+ 템플릿 + ZAP OWASP Top 10",
+        "유료 도구들의 기능을 하나로 통합",
+        "무료지만 엔터프라이즈급 품질"
+      ]
+    },
+    {
+      "category": "정확도",
+      "title": "중복 제거 = 깔끔한 결과",
+      "items": [
+        "스마트 중복 제거 알고리즘",
+        "더 높은 심각도 자동 선택",
+        "rdap-whois 6개 → 1개로 통합",
+        "HSTS, CSP 중복 자동 필터링"
+      ]
+    },
+    {
+      "category": "속도",
+      "title": "병렬 처리 = 빠른 스캔",
+      "items": [
+        "6개 스캐너 동시 실행",
+        "기본 스캔 30초 내 완료",
+        "전체 스캔 15분 이내 완료",
+        "실시간 진행 상황 확인"
+      ]
+    },
+    {
+      "category": "인텔리전스",
+      "title": "AI 분석 = 실용적인 보고서",
+      "items": [
+        "Claude AI가 취약점 자동 설명",
+        "High/Critical 취약점 수정 가이드",
+        "전체 스캔 AI 요약",
+        "초보자도 이해하기 쉬운 리포트"
+      ]
+    }
+  ],
+  "comparisons": {
+    "title": "경쟁 서비스와 비교",
+    "competitors": [
+      {
+        "feature": "포트 스캔",
+        "vibescan": "102개 주요 포트 + CVE 매핑",
+        "qualys": "전체 포트 스캔",
+        "others": "제한적"
+      },
+      {
+        "feature": "웹 취약점",
+        "vibescan": "Nuclei 8,000+ + ZAP",
+        "qualys": "자체 엔진",
+        "others": "기본 스캔"
+      },
+      {
+        "feature": "보안 헤더",
+        "vibescan": "CSP 파싱 + CORS 심층 분석",
+        "qualys": "기본 체크",
+        "others": "기본 체크"
+      },
+      {
+        "feature": "동적 스캔",
+        "vibescan": "ZAP Passive (안전)",
+        "qualys": "Active 스캔",
+        "others": "미지원"
+      },
+      {
+        "feature": "AI 분석",
+        "vibescan": "Claude AI 탑재",
+        "qualys": "미지원",
+        "others": "미지원"
+      },
+      {
+        "feature": "실시간 진행",
+        "vibescan": "WebSocket 실시간",
+        "qualys": "이메일 알림",
+        "others": "폴링"
+      },
+      {
+        "feature": "가격",
+        "vibescan": "무료 (오픈소스)",
+        "qualys": "$2,000+/년",
+        "others": "$500+/년"
+      }
+    ]
+  },
+  "technicalSpecs": {
+    "scanTime": {
+      "basic": "30초",
+      "full": "5-15분",
+      "average": "8분"
+    },
+    "coverage": {
+      "templates": "8,000+",
+      "ports": "102",
+      "headers": "14",
+      "totalChecks": "8,000+"
+    },
+    "accuracy": {
+      "falsePositiveRate": "낮음",
+      "deduplication": "자동",
+      "severityMapping": "5단계 (Critical → Info)"
+    }
+  },
+  "useCases": [
+    {
+      "persona": "스타트업 개발자",
+      "need": "빠르게 보안 점검",
+      "solution": "15분 안에 전체 스캔 완료, AI가 수정 방법 제시",
+      "benefit": "보안 전문가 없이도 취약점 파악 및 수정 가능"
+    },
+    {
+      "persona": "보안 담당자",
+      "need": "정기적인 보안 감사",
+      "solution": "8,000개 템플릿으로 빠짐없이 검사, 중복 없는 보고서",
+      "benefit": "효율적인 취약점 관리, 경영진 보고 자료 자동 생성"
+    },
+    {
+      "persona": "프리랜서",
+      "need": "클라이언트에게 보안 리포트 제공",
+      "solution": "전문적인 PDF 리포트, AI 요약, 공개 가능한 공유 링크",
+      "benefit": "유료 도구 없이도 고품질 보안 서비스 제공"
+    }
+  ],
+  "badges": [
+    "OWASP 공식 도구 사용",
+    "8,000+ 취약점 템플릿",
+    "AI 기반 분석",
+    "실시간 모니터링",
+    "100% 오픈소스",
+    "Docker 기반"
+  ],
+  "pricing": {
+    "free": {
+      "name": "Free",
+      "price": "₩0",
+      "features": [
+        "월 3회 스캔",
+        "기본 6개 스캐너",
+        "AI 요약",
+        "공개 공유 링크"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "₩9,900/월",
+      "features": [
+        "무제한 스캔",
+        "전체 스캐너",
+        "High/Critical AI 설명",
+        "PDF 다운로드",
+        "Private 스캔",
+        "우선 지원"
+      ]
+    }
+  },
+  "stats": {
+    "scanners": "6개",
+    "templates": "8,000+",
+    "ports": "102개",
+    "avgTime": "8분",
+    "accuracy": "높음"
+  }
+}

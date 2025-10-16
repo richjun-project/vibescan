@@ -1,0 +1,301 @@
+import { Injectable } from '@nestjs/common';
+import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+export interface AIExplanation {
+  explanation: string;
+  fixGuide: string;
+  severity: string;
+  impact: string;
+  recommendations: string[];
+}
+
+@Injectable()
+export class AIService {
+  private anthropic: Anthropic;
+  private openai: OpenAI;
+  private gemini: any;
+
+  constructor() {
+    // Initialize Gemini (Priority 1 - most cost-effective)
+    if (process.env.GEMINI_API_KEY) {
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      this.gemini = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' });
+    }
+
+    // Initialize Claude (Priority 2)
+    if (process.env.ANTHROPIC_API_KEY) {
+      this.anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+    }
+
+    // Initialize OpenAI (Priority 3)
+    if (process.env.OPENAI_API_KEY) {
+      this.openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+    }
+  }
+
+  async explainVulnerability(vulnerability: any): Promise<AIExplanation> {
+    const prompt = this.buildVulnerabilityPrompt(vulnerability);
+
+    try {
+      // Try Gemini first (most cost-effective)
+      if (this.gemini) {
+        return await this.explainWithGemini(prompt);
+      }
+
+      // Fallback to Claude (better for detailed technical explanations)
+      if (this.anthropic) {
+        return await this.explainWithClaude(prompt);
+      }
+
+      // Fallback to GPT-4o
+      if (this.openai) {
+        return await this.explainWithOpenAI(prompt);
+      }
+
+      // No API keys configured
+      return this.getFallbackExplanation(vulnerability);
+    } catch (error) {
+      console.error('AI explanation failed:', error);
+      return this.getFallbackExplanation(vulnerability);
+    }
+  }
+
+  async generateScanSummary(
+    vulnerabilities: any[],
+    score: number,
+  ): Promise<string> {
+    // Count vulnerabilities by severity
+    const severityCounts = vulnerabilities.reduce((acc, v) => {
+      acc[v.severity] = (acc[v.severity] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const prompt = `
+다음 보안 스캔 결과를 분석하여 구체적인 조치 방법을 알려주세요.
+
+점수: ${score}/100
+총 취약점 수: ${vulnerabilities.length}
+심각도별:
+- Critical: ${severityCounts.critical || 0}
+- High: ${severityCounts.high || 0}
+- Medium: ${severityCounts.medium || 0}
+- Low: ${severityCounts.low || 0}
+- Info: ${severityCounts.info || 0}
+
+발견된 취약점:
+${vulnerabilities.slice(0, 10).map((v, i) => `${i + 1}. [${v.severity}] ${v.title}${v.category ? ` (${v.category})` : ''}`).join('\n')}
+
+다음 형식으로 작성하세요 (마크다운 ** 표시 사용 금지):
+
+주요 취약점:
+• [구체적인 취약점 이름과 위치]
+• [구체적인 취약점 이름과 위치]
+• [구체적인 취약점 이름과 위치]
+
+조치 방법:
+1. [구체적인 코드 수정 방법이나 설정 변경 방법]
+2. [구체적인 코드 수정 방법이나 설정 변경 방법]
+3. [구체적인 코드 수정 방법이나 설정 변경 방법]
+
+예시:
+주요 취약점:
+• Content-Security-Policy 헤더 누락 - 모든 페이지에서 XSS 공격에 노출
+• HSTS 헤더 미설정 - HTTPS 다운그레이드 공격 가능
+• X-Frame-Options 미설정 - 클릭재킹 공격 가능
+
+조치 방법:
+1. 웹서버 설정 파일에 "Content-Security-Policy: default-src 'self'" 헤더 추가
+2. Nginx/Apache 설정에 "Strict-Transport-Security: max-age=31536000" 헤더 추가
+3. 응답 헤더에 "X-Frame-Options: DENY" 또는 "SAMEORIGIN" 추가
+
+한국어로 작성하고, 추상적인 표현("분석", "검토", "파악") 대신 실행 가능한 구체적인 방법을 제시하세요.
+마크다운 볼드 표시(**텍스트**)는 절대 사용하지 마세요.
+`;
+
+    try {
+      // Try Gemini first
+      if (this.gemini) {
+        const result = await this.gemini.generateContent(prompt);
+        const response = await result.response;
+        return response.text() || '요약을 생성할 수 없습니다.';
+      }
+
+      // Fallback to OpenAI
+      if (this.openai) {
+        const response = await this.openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.7,
+          max_tokens: 500,
+        });
+
+        return response.choices[0]?.message?.content || '요약을 생성할 수 없습니다.';
+      }
+
+      // Fallback to Claude
+      if (this.anthropic) {
+        const response = await this.anthropic.messages.create({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 500,
+          messages: [{ role: 'user', content: prompt }],
+        });
+
+        const content = response.content[0];
+        return content.type === 'text' ? content.text : '요약을 생성할 수 없습니다.';
+      }
+
+      return this.getFallbackSummary(score, vulnerabilities.length);
+    } catch (error) {
+      console.error('AI summary generation failed:', error);
+      return this.getFallbackSummary(score, vulnerabilities.length);
+    }
+  }
+
+  private async explainWithGemini(prompt: string): Promise<AIExplanation> {
+    const result = await this.gemini.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    return this.parseAIResponse(text);
+  }
+
+  private async explainWithClaude(prompt: string): Promise<AIExplanation> {
+    const response = await this.anthropic.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1500,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const content = response.content[0];
+    const text = content.type === 'text' ? content.text : '';
+
+    return this.parseAIResponse(text);
+  }
+
+  private async explainWithOpenAI(prompt: string): Promise<AIExplanation> {
+    const response = await this.openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      max_tokens: 1500,
+    });
+
+    const text = response.choices[0]?.message?.content || '';
+
+    return this.parseAIResponse(text);
+  }
+
+  private buildVulnerabilityPrompt(vulnerability: any): string {
+    return `
+당신은 보안 전문가입니다. 다음 보안 취약점을 분석하고 개발자가 이해하기 쉽게 설명해주세요.
+
+취약점 정보:
+- 제목: ${vulnerability.title}
+- 설명: ${vulnerability.description}
+- 심각도: ${vulnerability.severity}
+- 카테고리: ${vulnerability.category}
+${vulnerability.cveId ? `- CVE ID: ${vulnerability.cveId}` : ''}
+${vulnerability.file ? `- 파일: ${vulnerability.file}` : ''}
+
+다음 형식으로 답변하세요:
+
+## 설명
+(취약점이 무엇인지, 왜 발생했는지 쉽게 설명)
+
+## 영향
+(이 취약점이 실제로 어떤 피해를 줄 수 있는지)
+
+## 수정 방법
+(구체적인 수정 단계와 코드 예시)
+
+## 권장사항
+(추가로 고려해야 할 사항들)
+
+한국어로 작성하세요.
+`;
+  }
+
+  private parseAIResponse(text: string): AIExplanation {
+    // Simple parsing - can be improved with better structured output
+    const sections = {
+      explanation: '',
+      impact: '',
+      fixGuide: '',
+      recommendations: [] as string[],
+    };
+
+    const lines = text.split('\n');
+    let currentSection = 'explanation';
+
+    for (const line of lines) {
+      if (line.includes('## 영향') || line.includes('영향:')) {
+        currentSection = 'impact';
+        continue;
+      }
+      if (line.includes('## 수정') || line.includes('수정 방법:')) {
+        currentSection = 'fixGuide';
+        continue;
+      }
+      if (line.includes('## 권장') || line.includes('권장사항:')) {
+        currentSection = 'recommendations';
+        continue;
+      }
+
+      const trimmed = line.trim();
+      if (trimmed) {
+        if (currentSection === 'recommendations') {
+          if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
+            sections.recommendations.push(trimmed.substring(1).trim());
+          }
+        } else {
+          sections[currentSection] += trimmed + ' ';
+        }
+      }
+    }
+
+    return {
+      explanation: sections.explanation.trim(),
+      fixGuide: sections.fixGuide.trim(),
+      impact: sections.impact.trim(),
+      severity: 'medium',
+      recommendations: sections.recommendations,
+    };
+  }
+
+  private getFallbackExplanation(vulnerability: any): AIExplanation {
+    return {
+      explanation: vulnerability.description || '취약점이 발견되었습니다.',
+      fixGuide: '보안 팀에 문의하거나 관련 문서를 참조하세요.',
+      impact: '보안 위협이 존재할 수 있습니다.',
+      severity: vulnerability.severity || 'medium',
+      recommendations: ['보안 업데이트 적용', '보안 설정 검토'],
+    };
+  }
+
+  private getFallbackSummary(score: number, vulnCount: number): string {
+    let risks = '';
+    let actions = '';
+
+    if (score >= 90) {
+      risks = '주요 취약점:\n• 낮은 심각도의 보안 헤더 누락\n• 일부 정보성 취약점';
+      actions = '조치 방법:\n1. 웹서버 보안 헤더 설정 추가 (CSP, HSTS, X-Frame-Options)\n2. 정기적인 보안 스캔 스케줄 설정 (월 1회 권장)';
+    } else if (score >= 75) {
+      risks = '주요 취약점:\n• 보안 헤더 미설정\n• 일부 설정 오류 발견\n• 취약한 암호화 알고리즘 사용 가능성';
+      actions = '조치 방법:\n1. 웹서버 설정 파일에서 보안 헤더 추가\n2. SSL/TLS 설정 강화 (TLS 1.2 이상 사용)\n3. 취약점 상세 정보 확인 후 개별 조치';
+    } else if (score >= 50) {
+      risks = '주요 취약점:\n• 필수 보안 헤더 다수 누락\n• SSL/TLS 설정 취약\n• 민감한 정보 노출 가능성';
+      actions = '조치 방법:\n1. 즉시 HTTPS 강제 적용 (HTTP → HTTPS 리다이렉트)\n2. 모든 보안 헤더 추가 (Content-Security-Policy, HSTS, X-Content-Type-Options 등)\n3. 노출된 민감 정보 제거 (버전 정보, 디버그 메시지 등)';
+    } else {
+      risks = '주요 취약점:\n• 심각한 보안 설정 오류 다수\n• 중요 보안 헤더 전체 누락\n• 알려진 취약점 패턴 발견';
+      actions = '조치 방법:\n1. 즉시 Critical/High 등급 취약점 상세 내용 확인\n2. 웹 방화벽(WAF) 적용 고려\n3. 전문가 보안 감사 요청\n4. 모든 보안 헤더 및 SSL/TLS 설정 재구성';
+    }
+
+    return `${risks}\n\n${actions}`;
+  }
+}

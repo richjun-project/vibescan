@@ -1,0 +1,60 @@
+# Netlify 배포 설정
+[build]
+  # 빌드 명령어
+  command = "npm run build"
+
+  # 빌드 결과물 디렉토리 (.next/standalone 모드 사용)
+  publish = ".next"
+
+  # Node.js 버전
+  environment = { NODE_VERSION = "20" }
+
+# 환경변수 (Netlify UI에서도 설정 가능)
+[build.environment]
+  # Next.js standalone 모드 활성화
+  NEXT_PRIVATE_STANDALONE = "true"
+
+  # 프로덕션 모드
+  NODE_ENV = "production"
+
+  # API URL (배포 후 GCP Cloud Run URL로 변경 필요)
+  # 예: NEXT_PUBLIC_API_URL = "https://your-backend.run.app/api"
+  NEXT_PUBLIC_API_URL = "https://your-backend-url.run.app/api"
+
+# 리다이렉트 및 리라이트 규칙
+[[redirects]]
+  # API 요청을 백엔드로 프록시 (optional, CORS 대신 사용 가능)
+  from = "/api/*"
+  to = "https://your-backend-url.run.app/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  # SPA fallback - 모든 경로를 index.html로
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Role = ["admin", "user"]}
+
+# 헤더 설정
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# 플러그인 설정 (선택사항)
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

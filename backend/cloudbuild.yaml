@@ -1,0 +1,62 @@
+# GCP Cloud Build 설정 파일
+# Cloud Run 자동 배포 설정
+
+steps:
+  # Docker 이미지 빌드
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/vibescan-backend:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/vibescan-backend:latest'
+      - '-f'
+      - 'Dockerfile.cloudrun'
+      - '.'
+
+  # Docker 이미지를 GCR(Google Container Registry)에 푸시
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/vibescan-backend:$COMMIT_SHA'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/vibescan-backend:latest'
+
+  # Cloud Run에 배포
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'vibescan-backend'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/vibescan-backend:$COMMIT_SHA'
+      - '--region'
+      - 'asia-northeast3'  # 서울 리전
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'  # 공개 액세스 허용
+      - '--memory'
+      - '2Gi'
+      - '--cpu'
+      - '2'
+      - '--min-instances'
+      - '1'  # 최소 인스턴스 (콜드 스타트 방지)
+      - '--max-instances'
+      - '10'  # 최대 인스턴스
+      - '--port'
+      - '8080'
+      - '--set-env-vars'
+      - 'NODE_ENV=production'
+      # 추가 환경변수는 Secret Manager 사용 권장
+
+# 빌드 타임아웃
+timeout: '1200s'
+
+# 빌드 이미지 저장소
+images:
+  - 'gcr.io/$PROJECT_ID/vibescan-backend:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/vibescan-backend:latest'
