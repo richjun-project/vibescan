@@ -42,7 +42,7 @@ export class Scan {
   @Property({ nullable: true })
   score?: number; // 0-100
 
-  @Enum({ type: 'ScanGrade', nullable: true })
+  @Enum(() => ScanGrade)
   grade?: ScanGrade;
 
   @Property({ type: 'json', nullable: true })

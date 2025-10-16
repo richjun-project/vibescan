@@ -235,11 +235,11 @@ export class ScanProcessor extends WorkerHost {
         before: rawFindings.length,
         after: allFindings.length,
         removed: rawFindings.length - allFindings.length,
-      });
+      }, true);
 
       // Update progress: 70% - Analyzing findings
       await job.updateProgress(70);
-      this.scanGateway.sendProgress(scanId, 70, '보안 점수 계산 중...');
+      this.scanGateway.sendProgress(scanId, 70, '보안 점수 계산 중...', {}, true);
 
       // Calculate score
       this.logger.log(`[SCORE_START] Calculating score for scan ${scanId}`);
@@ -248,7 +248,7 @@ export class ScanProcessor extends WorkerHost {
 
       // Save vulnerabilities to database
       this.logger.log(`[DB_SAVE_START] Saving ${allFindings.length} vulnerabilities to database`);
-      this.scanGateway.sendProgress(scanId, 75, `${allFindings.length}개 취약점 저장 중...`);
+      this.scanGateway.sendProgress(scanId, 75, `${allFindings.length}개 취약점 저장 중...`, {}, true);
       const vulnerabilities = [];
       let aiExplanationsCount = 0;
 
@@ -277,13 +277,13 @@ export class ScanProcessor extends WorkerHost {
       this.scanGateway.sendProgress(scanId, 85, '취약점 저장 완료', {
         total: vulnerabilities.length,
         withAI: aiExplanationsCount,
-      });
+      }, true);
 
       // Generate AI summary (ONLY for paid scans)
       let aiSummary = '';
       if (scan.isPaid) {
         this.logger.log(`[AI_SUMMARY_START] Generating AI summary for paid scan ${scanId}`);
-        this.scanGateway.sendProgress(scanId, 90, 'AI 요약 생성 중...');
+        this.scanGateway.sendProgress(scanId, 90, 'AI 요약 생성 중...', {}, true);
         try {
           aiSummary = await this.aiService.generateScanSummary(
             allFindings,
