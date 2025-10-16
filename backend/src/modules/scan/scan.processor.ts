@@ -187,7 +187,7 @@ export class ScanProcessor extends WorkerHost {
       this.scanGateway.sendProgress(scanId, 60, '고급 스캔 완료', {
         nuclei: nucleiResult.findings.length,
         zap: zapResult.findings.length,
-      });
+      }, true);
 
       // Check scanner success rate
       const scannerResults = [
