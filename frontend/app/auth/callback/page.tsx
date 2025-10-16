@@ -18,8 +18,8 @@ function AuthCallbackPageContent() {
       localStorage.setItem("refreshToken", refreshToken)
 
       // Fetch user data
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000"
-      fetch(`${backendUrl}/api/user/profile`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api"
+      fetch(`${apiUrl}/user/profile`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
