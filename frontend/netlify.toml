@@ -6,9 +6,6 @@
   # 빌드 명령어
   command = "npm run build"
 
-  # 빌드 결과물 디렉토리는 @netlify/plugin-nextjs가 자동으로 처리
-  # publish = ".next"
-
 # 환경변수 (Netlify UI에서도 설정 가능)
 [build.environment]
   # Node.js 버전
@@ -29,13 +26,6 @@
   status = 200
   force = true
 
-[[redirects]]
-  # SPA fallback - 모든 경로를 index.html로
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = {Role = ["admin", "user"]}
-
 # 헤더 설정
 [[headers]]
   for = "/*"
@@ -55,6 +45,6 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# 플러그인 설정 (선택사항)
+# 플러그인 설정
 [[plugins]]
   package = "@netlify/plugin-nextjs"
