@@ -3,6 +3,10 @@ const path = require('path')
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: 'export',
+  images: {
+    unoptimized: true,
+  },
   // Allow cross-origin requests from local network for development
   allowedDevOrigins: [
     '192.168.45.77',
@@ -10,14 +14,6 @@ const nextConfig = {
     'localhost',
     '127.0.0.1',
   ],
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/:path*',
-      },
-    ];
-  },
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
