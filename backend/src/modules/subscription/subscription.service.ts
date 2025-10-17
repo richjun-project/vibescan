@@ -62,6 +62,13 @@ export class SubscriptionService {
 
     const user = await this.userRepository.findOneOrFail({ id: userId }, { populate: ['subscription'] });
 
+    // 이미 활성 구독이 있는지 확인
+    if (user.subscription && user.subscription.plan !== SubscriptionPlan.FREE) {
+      if (user.subscription.status === SubscriptionStatus.ACTIVE && !user.subscription.cancelAtPeriodEnd) {
+        throw new BadRequestException('이미 활성 구독이 있습니다. 플랜을 변경하려면 현재 구독을 취소한 후 새로운 구독을 시작해주세요.');
+      }
+    }
+
     // customerKey 생성 (토스페이먼츠 고객 식별자)
     const customerKey = `USER_${userId}_${crypto.randomBytes(8).toString('hex')}`;
 
