@@ -7,15 +7,78 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import Link from "next/link"
 import Image from "next/image"
 import { Shield, Zap, Award, ArrowRight, CheckCircle2, Sparkles, TrendingUp, Code, Lock, Rocket, Menu } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export default function Home() {
+  const router = useRouter()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [subscription, setSubscription] = useState<any>(null)
 
   useEffect(() => {
     // Check if user is logged in
     const token = localStorage.getItem("accessToken")
     setIsLoggedIn(!!token)
+
+    if (token) {
+      // Fetch subscription info
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscriptions/my`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data) {
+            setSubscription(data)
+          }
+        })
+        .catch(err => console.error('Failed to fetch subscription:', err))
+    }
   }, [])
+
+  const handleFreePlanClick = () => {
+    if (!isLoggedIn) {
+      router.push("/register")
+      return
+    }
+
+    // Check if user already has an active subscription (free or paid)
+    if (subscription && subscription.status === 'active') {
+      if (subscription.plan === 'free') {
+        // Already on free plan
+        toast.info("이미 무료 플랜을 이용 중입니다", {
+          description: "대시보드에서 스캔을 시작해보세요!",
+          action: {
+            label: "대시보드로 이동",
+            onClick: () => router.push("/dashboard")
+          }
+        })
+      } else {
+        // Currently on paid plan
+        const planNames: Record<string, string> = {
+          'starter': 'Starter',
+          'pro': 'Pro',
+          'business': 'Business',
+          'enterprise': 'Enterprise',
+        }
+        const currentPlanName = planNames[subscription.plan] || subscription.plan.toUpperCase()
+
+        toast.error("무료 플랜으로 변경할 수 없습니다", {
+          description: `현재 ${currentPlanName} 플랜을 이용 중입니다. 무료 플랜으로 변경하려면 대시보드에서 구독을 취소해주세요.`,
+          action: {
+            label: "대시보드로 이동",
+            onClick: () => router.push("/dashboard")
+          }
+        })
+      }
+      return
+    }
+
+    // No active subscription, redirect to dashboard
+    router.push("/dashboard")
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header - Apple Style with Mobile Nav */}
@@ -297,11 +360,13 @@ export default function Home() {
                 </li>
               </ul>
 
-              <Link href={isLoggedIn ? "/dashboard" : "/register"}>
-                <Button variant="secondary" className="w-full rounded-full text-sm">
-                  {isLoggedIn ? "대시보드" : "무료 시작"}
-                </Button>
-              </Link>
+              <Button
+                onClick={handleFreePlanClick}
+                variant="secondary"
+                className="w-full rounded-full text-sm"
+              >
+                무료 시작
+              </Button>
             </Card>
 
             {/* Starter Plan */}
