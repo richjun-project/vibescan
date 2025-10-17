@@ -328,12 +328,6 @@ export default function PricingPage() {
           <h2 className="text-3xl font-bold text-center mb-12">자주 묻는 질문</h2>
           <div className="space-y-6">
             <Card className="p-6">
-              <h3 className="font-semibold mb-2">무료 플랜에서도 전체 리포트를 받을 수 있나요?</h3>
-              <p className="text-gray-600">
-                네! 무료 플랜에서도 전체 취약점 리포트와 PDF 다운로드를 제공합니다. 다만 월 1회로 제한됩니다.
-              </p>
-            </Card>
-            <Card className="p-6">
               <h3 className="font-semibold mb-2">구독은 언제든지 취소할 수 있나요?</h3>
               <p className="text-gray-600">
                 네, 언제든지 구독을 취소할 수 있습니다. 취소 시 다음 결제일까지 서비스를 계속 이용하실 수 있습니다.
