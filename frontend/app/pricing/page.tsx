@@ -208,7 +208,7 @@ export default function PricingPage() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16">
           {SUBSCRIPTION_PLANS.map((plan) => {
             const Icon = plan.icon
             return (

@@ -257,7 +257,7 @@ export default function Home() {
 
       {/* Pricing Section - Apple Style */}
       <section className="container mx-auto px-6 py-20 md:py-32">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-4 tracking-tight">
               프로젝트에 맞는 구독 플랜
@@ -267,168 +267,161 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
             {/* Free Plan */}
-            <Card className="p-8 border border-gray-200 hover:border-gray-300 transition-all duration-150">
-              <div className="mb-6">
-                <div className="w-12 h-12 rounded-full bg-gray-500 flex items-center justify-center mb-4">
-                  <Shield className="w-6 h-6 text-white" />
+            <Card className="p-6 border border-gray-200 hover:border-gray-300 transition-all duration-150">
+              <div className="mb-5">
+                <div className="w-10 h-10 rounded-full bg-gray-500 flex items-center justify-center mb-3">
+                  <Shield className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">Free</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-1">Free</h3>
                 <div className="mb-1">
-                  <span className="text-5xl font-semibold text-gray-900">₩0</span>
-                  <span className="text-gray-500 text-lg font-medium">/월</span>
+                  <span className="text-3xl font-semibold text-gray-900">₩0</span>
+                  <span className="text-gray-500 text-sm font-medium">/월</span>
                 </div>
-                <p className="text-gray-500">개인 프로젝트용</p>
+                <p className="text-sm text-gray-500">개인 프로젝트용</p>
               </div>
 
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-900">월 1회 스캔</span>
+              <ul className="space-y-2 mb-6">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-sm text-gray-900">월 1회 스캔</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-900">전체 취약점 리포트</span>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-sm text-gray-900">기본 리포트</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-900">PDF 다운로드</span>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-sm text-gray-900">PDF 다운로드</span>
                 </li>
               </ul>
 
               <Link href={isLoggedIn ? "/dashboard" : "/register"}>
-                <Button variant="secondary" className="w-full rounded-full">
-                  {isLoggedIn ? "대시보드로 이동" : "무료로 시작하기"}
+                <Button variant="secondary" className="w-full rounded-full text-sm">
+                  {isLoggedIn ? "대시보드" : "무료 시작"}
                 </Button>
               </Link>
             </Card>
 
             {/* Starter Plan */}
-            <Card className="p-8 border border-gray-200 hover:border-gray-300 transition-all duration-150">
-              <div className="mb-6">
-                <div className="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center mb-4">
-                  <Sparkles className="w-6 h-6 text-white" />
+            <Card className="p-6 border border-gray-200 hover:border-gray-300 transition-all duration-150">
+              <div className="mb-5">
+                <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center mb-3">
+                  <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">Starter</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-1">Starter</h3>
                 <div className="mb-1">
-                  <span className="text-5xl font-semibold text-gray-900">₩9,900</span>
-                  <span className="text-gray-500 text-lg font-medium">/월</span>
+                  <span className="text-3xl font-semibold text-gray-900">₩9,900</span>
+                  <span className="text-gray-500 text-sm font-medium">/월</span>
                 </div>
-                <p className="text-gray-500">소규모 프로젝트용</p>
+                <p className="text-sm text-gray-500">소규모 프로젝트</p>
               </div>
 
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-900">월 5회 스캔</span>
+              <ul className="space-y-2 mb-6">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-900">월 5회 스캔</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-900">전체 취약점 리포트</span>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-900">전체 리포트</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-900">AI 기반 분석</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-900">PDF 다운로드</span>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-900">AI 분석</span>
                 </li>
               </ul>
 
               <Link href="/pricing">
-                <Button variant="secondary" className="w-full rounded-full">
+                <Button variant="secondary" className="w-full rounded-full text-sm">
                   구독하기
-                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
             </Card>
 
             {/* Pro Plan */}
-            <Card className="p-8 border-2 border-blue-600 bg-blue-50 hover:bg-blue-100 transition-all duration-150 relative overflow-hidden">
-              <div className="absolute top-4 right-4">
-                <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+            <Card className="p-6 border-2 border-blue-600 bg-blue-50 hover:bg-blue-100 transition-all duration-150 relative overflow-hidden">
+              <div className="absolute top-3 right-3">
+                <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
                   추천
                 </span>
               </div>
 
-              <div className="mb-6">
-                <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center mb-4">
-                  <Zap className="w-6 h-6 text-white" />
+              <div className="mb-5">
+                <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center mb-3">
+                  <Zap className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">Pro</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-1">Pro</h3>
                 <div className="mb-1">
-                  <span className="text-5xl font-semibold text-gray-900">₩29,900</span>
-                  <span className="text-gray-500 text-lg font-medium">/월</span>
+                  <span className="text-3xl font-semibold text-gray-900">₩29,900</span>
+                  <span className="text-gray-500 text-sm font-medium">/월</span>
                 </div>
-                <p className="text-gray-500">개발자 & 팀용</p>
+                <p className="text-sm text-gray-500">개발자 & 팀</p>
               </div>
 
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <span className="text-gray-900 font-medium">월 10회 스캔</span>
+              <ul className="space-y-2 mb-6">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-900 font-medium">월 10회 스캔</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <span className="text-gray-900 font-medium">전체 취약점 리포트</span>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-900 font-medium">전체 리포트</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <span className="text-gray-900 font-medium">AI 기반 분석</span>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-900 font-medium">AI 분석</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <span className="text-gray-900 font-medium">우선 지원</span>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-900 font-medium">우선 지원</span>
                 </li>
               </ul>
 
               <Link href="/pricing">
-                <Button className="w-full rounded-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold">
+                <Button className="w-full rounded-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-sm">
                   구독하기
-                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
             </Card>
 
             {/* Business Plan */}
-            <Card className="p-8 border border-gray-200 hover:border-gray-300 transition-all duration-150">
-              <div className="mb-6">
-                <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center mb-4">
-                  <Rocket className="w-6 h-6 text-white" />
+            <Card className="p-6 border border-gray-200 hover:border-gray-300 transition-all duration-150">
+              <div className="mb-5">
+                <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center mb-3">
+                  <Rocket className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">Business</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-1">Business</h3>
                 <div className="mb-1">
-                  <span className="text-5xl font-semibold text-gray-900">₩99,900</span>
-                  <span className="text-gray-500 text-lg font-medium">/월</span>
+                  <span className="text-3xl font-semibold text-gray-900">₩99,900</span>
+                  <span className="text-gray-500 text-sm font-medium">/월</span>
                 </div>
-                <p className="text-gray-500">기업용</p>
+                <p className="text-sm text-gray-500">기업용</p>
               </div>
 
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0" />
-                  <span className="text-gray-900">월 50회 스캔</span>
+              <ul className="space-y-2 mb-6">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-900">월 50회 스캔</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0" />
-                  <span className="text-gray-900">전체 취약점 리포트</span>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-900">전체 리포트</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0" />
-                  <span className="text-gray-900">AI 기반 분석</span>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-900">AI 분석</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-purple-600 flex-shrink-0" />
-                  <span className="text-gray-900">전담 지원</span>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                  <span className="text-sm text-gray-900">전담 지원</span>
                 </li>
               </ul>
 
               <Link href="/pricing">
-                <Button variant="secondary" className="w-full rounded-full">
+                <Button variant="secondary" className="w-full rounded-full text-sm">
                   구독하기
-                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
             </Card>
