@@ -297,73 +297,19 @@ export default function ScanDetailPage() {
     )
   }
 
-  // Generate sample vulnerabilities for teaser
+  // Get actual vulnerabilities from backend for preview (first 3)
   const getSampleVulnerabilities = () => {
-    const stats = getSeverityStats()
-    const samples = []
-
-    const templates = {
-      critical: [
-        { title: "SQL Injection 취약점", category: "Injection", description: "데이터베이스 쿼리 삽입을 통한 무단 접근 가능" },
-        { title: "인증 우회 취약점", category: "Authentication", description: "인증 메커니즘을 우회하여 관리자 권한 획득 가능" },
-        { title: "원격 코드 실행 (RCE)", category: "Code Execution", description: "공격자가 서버에서 임의의 코드 실행 가능" },
-      ],
-      high: [
-        { title: "크로스 사이트 스크립팅 (XSS)", category: "XSS", description: "악성 스크립트 주입을 통한 사용자 정보 탈취 가능" },
-        { title: "민감한 데이터 노출", category: "Data Exposure", description: "암호화되지 않은 민감 정보가 네트워크를 통해 전송됨" },
-        { title: "CSRF 공격 취약점", category: "CSRF", description: "사용자 의도와 무관한 요청 실행 가능" },
-      ],
-      medium: [
-        { title: "보안 헤더 누락", category: "Security Headers", description: "X-Frame-Options, CSP 등 보안 헤더가 설정되지 않음" },
-        { title: "취약한 암호화 알고리즘", category: "Cryptography", description: "MD5, SHA1 등 안전하지 않은 해시 알고리즘 사용 중" },
-        { title: "디렉토리 리스팅 노출", category: "Information Disclosure", description: "서버 디렉토리 구조가 외부에 노출됨" },
-      ],
-      low: [
-        { title: "쿠키 보안 속성 미설정", category: "Cookies", description: "HttpOnly, Secure 플래그가 설정되지 않은 쿠키 발견" },
-        { title: "오래된 JavaScript 라이브러리", category: "Dependencies", description: "알려진 취약점이 있는 구버전 라이브러리 사용 중" },
-      ],
+    if (!scan?.vulnerabilities || scan.vulnerabilities.length === 0) {
+      return []
     }
 
-    // Pick samples based on what's found - Increased to 5 samples
-    if (stats.critical > 0 && samples.length < 5) {
-      samples.push({ ...templates.critical[0], severity: "critical" as const })
-      if (stats.critical > 1 && samples.length < 5) {
-        samples.push({ ...templates.critical[1], severity: "critical" as const })
-      }
-    }
-    if (stats.high > 0 && samples.length < 5) {
-      samples.push({ ...templates.high[0], severity: "high" as const })
-      if (stats.high > 1 && samples.length < 5) {
-        samples.push({ ...templates.high[1], severity: "high" as const })
-      }
-    }
-    if ((stats.medium > 0 || stats.low > 0) && samples.length < 5) {
-      samples.push({ ...templates.medium[0], severity: "medium" as const })
-    }
-    if (stats.low > 0 && samples.length < 5) {
-      samples.push({ ...templates.low[0], severity: "low" as const })
-    }
-
-    // If still need more samples, add generic ones
-    while (samples.length < 3) {
-      if (stats.info > 0) {
-        samples.push({
-          title: "정보성 보안 권고사항",
-          category: "Information",
-          description: "보안 개선을 위한 권장사항",
-          severity: "info" as const,
-        })
-      } else {
-        samples.push({
-          title: "보안 취약점 발견",
-          category: "Security",
-          description: "상세한 분석 결과를 확인하세요",
-          severity: "medium" as const,
-        })
-      }
-    }
-
-    return samples.slice(0, 3)
+    // Return first 3 actual vulnerabilities from scan results
+    return scan.vulnerabilities.slice(0, 3).map(vuln => ({
+      title: vuln.title,
+      category: vuln.category,
+      description: vuln.description,
+      severity: vuln.severity,
+    }))
   }
 
   if (loading) {
