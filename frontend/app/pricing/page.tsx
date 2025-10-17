@@ -125,26 +125,38 @@ export default function PricingPage() {
     }
 
     if (planId === "free") {
-      // Check if user already has an active paid subscription
-      if (subscription && subscription.status === 'active' && subscription.plan !== 'free') {
-        const planNames: Record<string, string> = {
-          'starter': 'Starter',
-          'pro': 'Pro',
-          'business': 'Business',
-          'enterprise': 'Enterprise',
-        }
-        const currentPlanName = planNames[subscription.plan] || subscription.plan.toUpperCase()
-
-        toast.error("무료 플랜으로 변경할 수 없습니다", {
-          description: `현재 ${currentPlanName} 플랜을 이용 중입니다. 무료 플랜으로 변경하려면 대시보드에서 구독을 취소해주세요.`,
-          action: {
-            label: "대시보드로 이동",
-            onClick: () => router.push("/dashboard")
+      // Check if user already has an active subscription (free or paid)
+      if (subscription && subscription.status === 'active') {
+        if (subscription.plan === 'free') {
+          // Already on free plan
+          toast.info("이미 무료 플랜을 이용 중입니다", {
+            description: "대시보드에서 스캔을 시작해보세요!",
+            action: {
+              label: "대시보드로 이동",
+              onClick: () => router.push("/dashboard")
+            }
+          })
+        } else {
+          // Currently on paid plan, cannot downgrade to free directly
+          const planNames: Record<string, string> = {
+            'starter': 'Starter',
+            'pro': 'Pro',
+            'business': 'Business',
+            'enterprise': 'Enterprise',
           }
-        })
+          const currentPlanName = planNames[subscription.plan] || subscription.plan.toUpperCase()
+
+          toast.error("무료 플랜으로 변경할 수 없습니다", {
+            description: `현재 ${currentPlanName} 플랜을 이용 중입니다. 무료 플랜으로 변경하려면 대시보드에서 구독을 취소해주세요.`,
+            action: {
+              label: "대시보드로 이동",
+              onClick: () => router.push("/dashboard")
+            }
+          })
+        }
         return
       }
-      // Free plan is automatically assigned on signup
+      // No active subscription, redirect to dashboard (free plan will be auto-assigned)
       router.push("/dashboard")
       return
     }
