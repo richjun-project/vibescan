@@ -988,6 +988,69 @@ export default function DashboardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Footer - Detailed Company Info */}
+      <footer className="border-t border-gray-200 bg-gray-50 py-16 mt-20">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+            {/* Company Info */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4 text-sm">회사 정보</h3>
+              <div className="space-y-2 text-sm text-gray-600">
+                <p><span className="font-semibold text-gray-900">회사명:</span> silverithm</p>
+                <p><span className="font-semibold text-gray-900">대표자:</span> 김준형</p>
+                <p><span className="font-semibold text-gray-900">사업자등록번호:</span> 107-21-26475</p>
+              </div>
+            </div>
+
+            {/* Contact Info */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4 text-sm">연락처</h3>
+              <div className="space-y-2 text-sm text-gray-600">
+                <p><span className="font-semibold text-gray-900">주소:</span><br/>서울특별시 관악구 신림동 1547-10</p>
+                <p><span className="font-semibold text-gray-900">이메일:</span><br/><a href="mailto:ggprgrkjh2@gmail.com" className="hover:text-blue-600 transition-colors">ggprgrkjh2@gmail.com</a></p>
+                <p><span className="font-semibold text-gray-900">전화번호:</span> 010-4549-2094</p>
+              </div>
+            </div>
+
+            {/* Legal Links */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4 text-sm">법적 고지</h3>
+              <div className="space-y-2 text-sm text-gray-600">
+                <div><Link href="/privacy" className="hover:text-gray-900 transition-colors">개인정보 처리방침</Link></div>
+                <div><Link href="/terms" className="hover:text-gray-900 transition-colors">서비스 이용약관</Link></div>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4 text-sm">바로가기</h3>
+              <div className="space-y-2 text-sm text-gray-600">
+                <div><Link href="/pricing" className="hover:text-gray-900 transition-colors">요금제</Link></div>
+                <div><Link href="/dashboard" className="hover:text-gray-900 transition-colors">대시보드</Link></div>
+                <div><a href="mailto:ggprgrkjh2@gmail.com" className="hover:text-gray-900 transition-colors">문의하기</a></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Logo and Copyright */}
+          <div className="pt-8 border-t border-gray-200">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <Link href="/" className="flex items-center gap-2">
+                <Image
+                  src="/logo.png"
+                  alt="VibeScan 로고"
+                  width={28}
+                  height={28}
+                  className="w-7 h-7"
+                />
+                <span className="text-xl font-semibold text-gray-900">VibeScan</span>
+              </Link>
+              <p className="text-sm text-gray-500">© 2025 VibeScan by silverithm. All rights reserved.</p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
