@@ -15,6 +15,7 @@
 - **Primary Blue Light**: `#E5F2FF` - Light background
 
 
+
 ### Neutrals
 - **Background**: `#FFFFFF` - Pure white
 - **Background Secondary**: `#F9FAFB` - Light gray (Apple gray-50)
