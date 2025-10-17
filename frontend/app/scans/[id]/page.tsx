@@ -493,7 +493,7 @@ export default function ScanDetailPage() {
             </div>
 
             {/* Progress Steps */}
-            <div className="mt-8 grid grid-cols-5 gap-3">
+            <div className="mt-8 grid grid-cols-4 gap-4">
               <div className={cn(
                 "text-center transition-all",
                 progress >= 5 ? 'opacity-100' : 'opacity-40'
@@ -574,36 +574,10 @@ export default function ScanDetailPage() {
               </div>
               <div className={cn(
                 "text-center transition-all",
-                progress >= 98 ? 'opacity-100' : 'opacity-40'
-              )}>
-                <div className="relative inline-block">
-                  {progress >= 90 && progress < 98 && (
-                    <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-teal-400 animate-ring-pulse" />
-                  )}
-                  <div className={cn(
-                    "w-10 h-10 mx-auto mb-3 rounded-full flex items-center justify-center transition-all shadow-sm",
-                    progress >= 98
-                      ? 'bg-teal-600 scale-110'
-                      : 'bg-gray-300'
-                  )}>
-                    {progress >= 98 ? (
-                      <Check className="w-5 h-5 text-white" />
-                    ) : (
-                      <span className="text-xs font-bold text-white">4</span>
-                    )}
-                  </div>
-                </div>
-                <span className={cn(
-                  "text-xs font-medium block",
-                  progress >= 98 ? 'text-teal-600' : 'text-gray-400'
-                )}>최종 분석</span>
-              </div>
-              <div className={cn(
-                "text-center transition-all",
                 progress >= 100 ? 'opacity-100' : 'opacity-40'
               )}>
                 <div className="relative inline-block">
-                  {progress >= 98 && progress < 100 && (
+                  {progress >= 90 && progress < 100 && (
                     <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-green-400 animate-ring-pulse" />
                   )}
                   <div className={cn(
@@ -615,7 +589,7 @@ export default function ScanDetailPage() {
                     {progress >= 100 ? (
                       <Check className="w-5 h-5 text-white" />
                     ) : (
-                      <span className="text-xs font-bold text-white">5</span>
+                      <span className="text-xs font-bold text-white">4</span>
                     )}
                   </div>
                 </div>

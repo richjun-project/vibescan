@@ -69,46 +69,48 @@ export class ScanProcessor extends WorkerHost {
       await job.updateProgress(0);
       this.scanGateway.sendProgress(scanId, 0, '스캔 시작', { domain });
 
-      // Run all scanners in parallel
-      // Note: Nuclei requires Docker and may fail in some environments
-      this.logger.log(`[SCANNERS_START] Starting parallel scanners for scan ${scanId}`);
+      // Run all scanners sequentially with progress updates
+      this.logger.log(`[SCANNERS_START] Starting basic scanners for scan ${scanId}`);
       this.scanGateway.sendProgress(scanId, 5, '기본 보안 스캐너 시작 중...');
-      this.scanGateway.sendProgress(scanId, 10, 'HTTP 헤더 보안 검사 중...');
-      this.scanGateway.sendProgress(scanId, 15, 'SSL/TLS 인증서 검증 중...');
-      this.scanGateway.sendProgress(scanId, 20, '웹 기술 스택 분석 중...');
-      this.scanGateway.sendProgress(scanId, 25, '포트 스캔 진행 중...');
       const startTime = Date.now();
 
-      const [
-        headersResult,
-        sslResult,
-        webReconResult,
-        portScanResult,
-      ] = await Promise.all([
-        this.headersScanner.scan(domain).catch(e => {
-          this.logger.error(`[SCANNER_ERROR] Headers scanner failed for scan ${scanId}: ${e.message}`);
-          return { success: false, findings: [], error: e.message };
-        }),
-        this.sslScanner.scan(domain).catch(e => {
-          this.logger.error(`[SCANNER_ERROR] SSL scanner failed for scan ${scanId}: ${e.message}`);
-          return { success: false, findings: [], error: e.message };
-        }),
-        this.webReconScanner.scan(domain).catch(e => {
-          this.logger.error(`[SCANNER_ERROR] WebRecon scanner failed for scan ${scanId}: ${e.message}`);
-          return { success: false, findings: [], error: e.message };
-        }),
-        this.portScanner.scan(domain).catch(e => {
-          this.logger.error(`[SCANNER_ERROR] Port scanner failed for scan ${scanId}: ${e.message}`);
-          return { success: false, findings: [], error: e.message };
-        }),
-      ]);
+      // Headers Scanner (5% -> 15%)
+      this.scanGateway.sendProgress(scanId, 10, 'HTTP 헤더 보안 검사 중...');
+      const headersResult = await this.headersScanner.scan(domain).catch(e => {
+        this.logger.error(`[SCANNER_ERROR] Headers scanner failed for scan ${scanId}: ${e.message}`);
+        return { success: false, findings: [], error: e.message };
+      });
+      this.logger.log(`[HEADERS_DONE] Headers scanner completed with ${headersResult.findings.length} findings`);
+
+      // SSL Scanner (15% -> 25%)
+      this.scanGateway.sendProgress(scanId, 15, 'SSL/TLS 인증서 검증 중...');
+      const sslResult = await this.sslScanner.scan(domain).catch(e => {
+        this.logger.error(`[SCANNER_ERROR] SSL scanner failed for scan ${scanId}: ${e.message}`);
+        return { success: false, findings: [], error: e.message };
+      });
+      this.logger.log(`[SSL_DONE] SSL scanner completed with ${sslResult.findings.length} findings`);
+
+      // WebRecon Scanner (25% -> 30%)
+      this.scanGateway.sendProgress(scanId, 25, '웹 기술 스택 분석 중...');
+      const webReconResult = await this.webReconScanner.scan(domain).catch(e => {
+        this.logger.error(`[SCANNER_ERROR] WebRecon scanner failed for scan ${scanId}: ${e.message}`);
+        return { success: false, findings: [], error: e.message };
+      });
+      this.logger.log(`[WEBRECON_DONE] WebRecon scanner completed with ${webReconResult.findings.length} findings`);
+
+      // Port Scanner (30% -> 40%)
+      this.scanGateway.sendProgress(scanId, 30, '포트 스캔 진행 중...');
+      const portScanResult = await this.portScanner.scan(domain).catch(e => {
+        this.logger.error(`[SCANNER_ERROR] Port scanner failed for scan ${scanId}: ${e.message}`);
+        return { success: false, findings: [], error: e.message };
+      });
+      this.logger.log(`[PORTSCAN_DONE] Port scanner completed with ${portScanResult.findings.length} findings`);
 
       this.logger.log(`[SCANNERS_DONE] Basic scanners completed in ${Date.now() - startTime}ms`);
       this.logger.log(`[SCANNERS_RESULT] Headers: ${headersResult.findings.length} findings, SSL: ${sslResult.findings.length} findings, WebRecon: ${webReconResult.findings.length} findings, Ports: ${portScanResult.findings.length} findings`);
 
       // Update progress: 40% - Basic scanners completed
       await job.updateProgress(40);
-      this.scanGateway.sendProgress(scanId, 35, '기본 스캔 분석 중...');
       this.scanGateway.sendProgress(scanId, 40, '기본 스캔 완료', {
         headers: headersResult.findings.length,
         ssl: sslResult.findings.length,
