@@ -90,8 +90,6 @@ function SubscriptionCheckoutPageContent() {
     const errorMessage = searchParams.get("message")
 
     if (error === "billing_auth_failed") {
-      console.log("[BILLING_AUTH] Failed:", { errorCode, errorMessage })
-
       // Display error to user
       toast.error("카드 등록 실패", {
         description: errorMessage ? decodeURIComponent(errorMessage) : "카드 정보를 확인해주세요.",
@@ -113,10 +111,8 @@ function SubscriptionCheckoutPageContent() {
     try {
       // Get customerKey from backend (구독 정보는 변경하지 않음!)
       const result = await apiClient.initiateSubscription(plan)
-      console.log('[SUBSCRIPTION] Received result:', result)
 
       if (!result.customerKey) {
-        console.error('[SUBSCRIPTION] No customerKey in result:', result)
         toast.error("구독 시작에 실패했습니다")
         setLoading(false)
         return

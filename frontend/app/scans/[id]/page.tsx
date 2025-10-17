@@ -146,12 +146,10 @@ export default function ScanDetailPage() {
     })
 
     socket.on("connect", () => {
-      console.log("WebSocket connected")
       socket.emit("subscribe-scan", parseInt(scanId))
     })
 
     socket.on("scan-progress", (data: any) => {
-      console.log("Progress update:", data)
       if (data.scanId === parseInt(scanId)) {
         setProgress(data.progress)
         setProgressMessage(data.message)
@@ -159,7 +157,6 @@ export default function ScanDetailPage() {
     })
 
     socket.on("scan-completed", (data: any) => {
-      console.log("Scan completed:", data)
       if (data.scanId === parseInt(scanId)) {
         setProgress(100)
         setProgressMessage("Scan completed")
@@ -170,7 +167,6 @@ export default function ScanDetailPage() {
     })
 
     socket.on("scan-failed", (data: any) => {
-      console.log("Scan failed:", data)
       if (data.scanId === parseInt(scanId)) {
         setProgressMessage(`Scan failed: ${data.error}`)
         toast.error("스캔 실패", {
@@ -180,7 +176,7 @@ export default function ScanDetailPage() {
     })
 
     socket.on("disconnect", () => {
-      console.log("WebSocket disconnected")
+      // WebSocket disconnected
     })
 
     return () => {

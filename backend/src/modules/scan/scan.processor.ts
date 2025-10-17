@@ -74,7 +74,7 @@ export class ScanProcessor extends WorkerHost {
       this.scanGateway.sendProgress(scanId, 5, '기본 보안 스캐너 시작 중...');
       const startTime = Date.now();
 
-      // Headers Scanner (5% -> 15%)
+      // Headers Scanner
       this.scanGateway.sendProgress(scanId, 10, 'HTTP 헤더 보안 검사 중...');
       const headersResult = await this.headersScanner.scan(domain).catch(e => {
         this.logger.error(`[SCANNER_ERROR] Headers scanner failed for scan ${scanId}: ${e.message}`);
@@ -82,24 +82,24 @@ export class ScanProcessor extends WorkerHost {
       });
       this.logger.log(`[HEADERS_DONE] Headers scanner completed with ${headersResult.findings.length} findings`);
 
-      // SSL Scanner (15% -> 25%)
-      this.scanGateway.sendProgress(scanId, 15, 'SSL/TLS 인증서 검증 중...');
+      // SSL Scanner
+      this.scanGateway.sendProgress(scanId, 20, 'SSL/TLS 인증서 검증 중...');
       const sslResult = await this.sslScanner.scan(domain).catch(e => {
         this.logger.error(`[SCANNER_ERROR] SSL scanner failed for scan ${scanId}: ${e.message}`);
         return { success: false, findings: [], error: e.message };
       });
       this.logger.log(`[SSL_DONE] SSL scanner completed with ${sslResult.findings.length} findings`);
 
-      // WebRecon Scanner (25% -> 30%)
-      this.scanGateway.sendProgress(scanId, 25, '웹 기술 스택 분석 중...');
+      // WebRecon Scanner
+      this.scanGateway.sendProgress(scanId, 30, '웹 기술 스택 분석 중...');
       const webReconResult = await this.webReconScanner.scan(domain).catch(e => {
         this.logger.error(`[SCANNER_ERROR] WebRecon scanner failed for scan ${scanId}: ${e.message}`);
         return { success: false, findings: [], error: e.message };
       });
       this.logger.log(`[WEBRECON_DONE] WebRecon scanner completed with ${webReconResult.findings.length} findings`);
 
-      // Port Scanner (30% -> 40%)
-      this.scanGateway.sendProgress(scanId, 30, '포트 스캔 진행 중...');
+      // Port Scanner
+      this.scanGateway.sendProgress(scanId, 35, '포트 스캔 진행 중...');
       const portScanResult = await this.portScanner.scan(domain).catch(e => {
         this.logger.error(`[SCANNER_ERROR] Port scanner failed for scan ${scanId}: ${e.message}`);
         return { success: false, findings: [], error: e.message };
@@ -111,12 +111,6 @@ export class ScanProcessor extends WorkerHost {
 
       // Update progress: 40% - Basic scanners completed
       await job.updateProgress(40);
-      this.scanGateway.sendProgress(scanId, 40, '기본 스캔 완료', {
-        headers: headersResult.findings.length,
-        ssl: sslResult.findings.length,
-        webRecon: webReconResult.findings.length,
-        ports: portScanResult.findings.length,
-      });
 
       // Run advanced scanners (Nuclei + ZAP) in parallel
       this.logger.log(`[ADVANCED_SCANNERS_START] Starting Nuclei and ZAP scans for scan ${scanId}`);

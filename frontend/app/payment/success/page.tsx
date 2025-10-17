@@ -65,7 +65,6 @@ function PaymentSuccessPageContent() {
         const upgradeScanId = localStorage.getItem("upgradeScanId")
         if (upgradeScanId) {
           try {
-            console.log(`[UPGRADE] Upgrading scan ${upgradeScanId} to paid`)
             await apiClient.upgradeScanToPaid(parseInt(upgradeScanId))
             toast.success("AI 분석이 생성되고 있습니다!", {
               description: "몇 초 후 상세 리포트를 확인할 수 있습니다",
