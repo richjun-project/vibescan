@@ -171,6 +171,22 @@ export default function DashboardPage() {
       return
     }
 
+    // Block scanning of own domain
+    const normalizedDomain = trimmedDomain.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')
+    const blockedDomains = [
+      'ourvibescan.netlify.app',
+      'vibescan.kr',
+      'www.vibescan.kr',
+      'localhost',
+    ]
+
+    if (blockedDomains.some(blocked => normalizedDomain.includes(blocked))) {
+      toast.error("이 도메인은 스캔할 수 없습니다", {
+        description: "VibeScan 자체 도메인은 스캔이 제한됩니다.",
+      })
+      return
+    }
+
     // 중복 스캔 체크 (진행 중인 스캔)
     const existingActiveScan = scans.find(
       s => s.domain === trimmedDomain && (s.status === 'pending' || s.status === 'running')

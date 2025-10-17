@@ -534,7 +534,7 @@ export default function ScanDetailPage() {
                     <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-blue-400 animate-ring-pulse" />
                   )}
                   <div className={cn(
-                    "w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center transition-all shadow-sm",
+                    "w-10 h-10 mx-auto mb-3 rounded-full flex items-center justify-center transition-all shadow-sm",
                     progress >= 5
                       ? 'bg-blue-600 scale-110'
                       : 'bg-gray-300'
@@ -547,7 +547,7 @@ export default function ScanDetailPage() {
                   </div>
                 </div>
                 <span className={cn(
-                  "text-xs font-medium",
+                  "text-xs font-medium block",
                   progress >= 5 ? 'text-blue-600' : 'text-gray-400'
                 )}>초기화</span>
               </div>
@@ -560,7 +560,7 @@ export default function ScanDetailPage() {
                     <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-purple-400 animate-ring-pulse" />
                   )}
                   <div className={cn(
-                    "w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center transition-all shadow-sm",
+                    "w-10 h-10 mx-auto mb-3 rounded-full flex items-center justify-center transition-all shadow-sm",
                     progress >= 30
                       ? 'bg-purple-600 scale-110'
                       : 'bg-gray-300'
@@ -573,7 +573,7 @@ export default function ScanDetailPage() {
                   </div>
                 </div>
                 <span className={cn(
-                  "text-xs font-medium",
+                  "text-xs font-medium block",
                   progress >= 30 ? 'text-purple-600' : 'text-gray-400'
                 )}>스캔 중</span>
               </div>
@@ -586,7 +586,7 @@ export default function ScanDetailPage() {
                     <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-indigo-400 animate-ring-pulse" />
                   )}
                   <div className={cn(
-                    "w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center transition-all shadow-sm",
+                    "w-10 h-10 mx-auto mb-3 rounded-full flex items-center justify-center transition-all shadow-sm",
                     progress >= 60
                       ? 'bg-indigo-600 scale-110'
                       : 'bg-gray-300'
@@ -599,7 +599,7 @@ export default function ScanDetailPage() {
                   </div>
                 </div>
                 <span className={cn(
-                  "text-xs font-medium",
+                  "text-xs font-medium block",
                   progress >= 60 ? 'text-indigo-600' : 'text-gray-400'
                 )}>분석 중</span>
               </div>
@@ -612,7 +612,7 @@ export default function ScanDetailPage() {
                     <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-green-400 animate-ring-pulse" />
                   )}
                   <div className={cn(
-                    "w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center transition-all shadow-sm",
+                    "w-10 h-10 mx-auto mb-3 rounded-full flex items-center justify-center transition-all shadow-sm",
                     progress >= 100
                       ? 'bg-green-600 scale-110'
                       : 'bg-gray-300'
@@ -625,7 +625,7 @@ export default function ScanDetailPage() {
                   </div>
                 </div>
                 <span className={cn(
-                  "text-xs font-medium",
+                  "text-xs font-medium block",
                   progress >= 100 ? 'text-green-600' : 'text-gray-400'
                 )}>완료</span>
               </div>

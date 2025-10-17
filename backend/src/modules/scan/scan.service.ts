@@ -34,6 +34,20 @@ export class ScanService {
   async createScan(user: User, domain: string, repositoryUrl?: string) {
     this.logger.log(`[CREATE_SCAN] Starting scan creation for user ${user.id}, domain: ${domain}`);
 
+    // Block scanning of own domain
+    const normalizedDomain = domain.toLowerCase().trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+    const blockedDomains = [
+      'ourvibescan.netlify.app',
+      'vibescan.kr',
+      'www.vibescan.kr',
+      'localhost',
+    ];
+
+    if (blockedDomains.some(blocked => normalizedDomain.includes(blocked))) {
+      this.logger.warn(`[CREATE_SCAN] Blocked scan attempt for restricted domain: ${domain}`);
+      throw new ForbiddenException('이 도메인은 스캔할 수 없습니다.');
+    }
+
     // Get or create subscription
     let subscription = await this.subscriptionRepository.findOne(
       { user: user.id },
