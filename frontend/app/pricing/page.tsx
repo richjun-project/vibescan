@@ -19,10 +19,8 @@ const SUBSCRIPTION_PLANS = [
     description: "개인 프로젝트를 위한 무료 플랜",
     features: [
       "월 1회 보안 스캔",
-      "전체 취약점 리포트",
-      "PDF 다운로드",
       "기본 보안 점수",
-      "이메일 알림",
+      "미리보기 제공",
     ],
     icon: Shield,
     color: "from-gray-500 to-gray-600",

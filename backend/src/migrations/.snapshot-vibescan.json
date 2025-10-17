@@ -311,6 +311,7 @@
           "default": "'free'",
           "enumItems": [
             "free",
+            "starter",
             "pro",
             "business",
             "enterprise"
@@ -564,11 +565,17 @@
         },
         "grade": {
           "name": "grade",
-          "type": "smallint",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
+          "enumItems": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
           "mappedType": "enum"
         },
         "results": {
