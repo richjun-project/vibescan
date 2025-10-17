@@ -190,6 +190,8 @@ export default function DashboardPage() {
       'ourvibescan.netlify.app',
       'vibescan.kr',
       'www.vibescan.kr',
+      'vibescan.co.kr',
+      'www.vibescan.co.kr',
       'localhost',
     ]
 
