@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { Subscription, SubscriptionPlan, SubscriptionStatus } from '../../entities/subscription.entity';
 import { User } from '../../entities/user.entity';
 import { Payment, PaymentStatus } from '../../entities/payment.entity';
+import { PaymentLog, PaymentLogStatus } from '../../entities/payment-log.entity';
 import { TossPaymentsService } from '../payment/toss-payments.service';
 import * as crypto from 'crypto';
 
@@ -19,6 +20,8 @@ export class SubscriptionService {
     private readonly userRepository: EntityRepository<User>,
     @InjectRepository(Payment)
     private readonly paymentRepository: EntityRepository<Payment>,
+    @InjectRepository(PaymentLog)
+    private readonly paymentLogRepository: EntityRepository<PaymentLog>,
     private readonly tossPaymentsService: TossPaymentsService,
     private readonly configService: ConfigService,
     private readonly em: EntityManager,
@@ -73,85 +76,187 @@ export class SubscriptionService {
   async completeBillingAuth(userId: number, authKey: string, customerKey: string, plan: SubscriptionPlan): Promise<Subscription> {
     const user = await this.userRepository.findOneOrFail({ id: userId }, { populate: ['subscription'] });
 
-    // 토스페이먼츠에서 빌링키 발급
-    const { billingKey } = await this.tossPaymentsService.issueBillingKey(authKey, customerKey);
-
-    this.logger.log(`[COMPLETE_BILLING_AUTH] Billing key issued for user ${userId}`);
-
-    // 첫 결제 진행
     const amount = this.getPlanPrice(plan);
     const planName = this.getPlanDisplayName(plan);
 
-    try {
-      const paymentResult = await this.tossPaymentsService.processBillingPayment(
-        billingKey,
-        customerKey,
-        amount,
-        `${planName} 플랜 첫 결제`,
-      );
+    // 로그 1: 결제 시작
+    const paymentLog = this.em.create(PaymentLog, {
+      user,
+      amount,
+      subscriptionPlan: plan,
+      status: PaymentLogStatus.INITIATED,
+      message: '결제 프로세스 시작',
+      requestData: { authKey, customerKey, plan, planName },
+    });
+    await this.em.persistAndFlush(paymentLog);
 
-      this.logger.log(`[COMPLETE_BILLING_AUTH] First payment completed for user ${userId}`);
+    try {
+      // 토스페이먼츠에서 빌링키 발급
+      const { billingKey } = await this.tossPaymentsService.issueBillingKey(authKey, customerKey);
+
+      this.logger.log(`[COMPLETE_BILLING_AUTH] Billing key issued for user ${userId}`);
+
+      // 로그 2: Toss 빌링키 발급 성공
+      paymentLog.status = PaymentLogStatus.TOSS_SUCCESS;
+      paymentLog.message = '빌링키 발급 성공';
+      paymentLog.responseData = { billingKey };
+      await this.em.flush();
+
+      // 첫 결제 진행
+      let paymentResult;
+      try {
+        paymentResult = await this.tossPaymentsService.processBillingPayment(
+          billingKey,
+          customerKey,
+          amount,
+          `${planName} 플랜 첫 결제`,
+        );
+
+        this.logger.log(`[COMPLETE_BILLING_AUTH] First payment completed for user ${userId}`);
+
+        // 로그 3: Toss 결제 성공
+        paymentLog.status = PaymentLogStatus.TOSS_SUCCESS;
+        paymentLog.message = 'Toss 결제 승인 성공';
+        paymentLog.paymentKey = paymentResult.paymentKey;
+        paymentLog.orderId = paymentResult.orderId;
+        paymentLog.responseData = { ...paymentLog.responseData, paymentResult };
+        await this.em.flush();
+
+      } catch (tossError) {
+        // 로그 4: Toss 결제 실패
+        paymentLog.status = PaymentLogStatus.TOSS_FAILED;
+        paymentLog.message = 'Toss 결제 승인 실패';
+        paymentLog.errorData = {
+          error: tossError instanceof Error ? tossError.message : String(tossError),
+          stack: tossError instanceof Error ? tossError.stack : undefined,
+        };
+        await this.em.flush();
+
+        this.logger.error(`[COMPLETE_BILLING_AUTH] Toss payment failed for user ${userId}:`, tossError);
+        throw new BadRequestException('결제 승인이 실패했습니다. 카드 정보를 확인해주세요.');
+      }
 
       // 결제 기록 생성
-      const payment = this.em.create(Payment, {
-        user,
-        orderId: paymentResult.orderId,
-        paymentKey: paymentResult.paymentKey,
-        orderName: `${planName} 플랜 첫 결제`,
-        amount: paymentResult.amount,
-        status: PaymentStatus.COMPLETED,
-        method: paymentResult.method as any,
-        subscriptionPlan: plan,
-        isRecurring: true,
-        billingKey,
-        approvedAt: new Date(paymentResult.approvedAt),
-      });
+      try {
+        const payment = this.em.create(Payment, {
+          user,
+          orderId: paymentResult.orderId,
+          paymentKey: paymentResult.paymentKey,
+          orderName: `${planName} 플랜 첫 결제`,
+          amount: paymentResult.amount,
+          status: PaymentStatus.COMPLETED,
+          method: paymentResult.method as any,
+          subscriptionPlan: plan,
+          isRecurring: true,
+          billingKey,
+          approvedAt: new Date(paymentResult.approvedAt),
+        });
 
-      await this.em.persistAndFlush(payment);
+        await this.em.persistAndFlush(payment);
+
+        // 로그 5: DB 저장 성공
+        paymentLog.status = PaymentLogStatus.DB_SAVE_SUCCESS;
+        paymentLog.message = '결제 정보 DB 저장 성공';
+        await this.em.flush();
+
+      } catch (dbError) {
+        // 로그 6: DB 저장 실패 (중요!)
+        paymentLog.status = PaymentLogStatus.DB_SAVE_FAILED;
+        paymentLog.message = '결제 정보 DB 저장 실패';
+        paymentLog.errorData = {
+          ...paymentLog.errorData,
+          dbError: dbError instanceof Error ? dbError.message : String(dbError),
+          stack: dbError instanceof Error ? dbError.stack : undefined,
+        };
+        await this.em.flush();
+
+        this.logger.error(`[COMPLETE_BILLING_AUTH] Payment DB save failed for user ${userId}:`, dbError);
+        throw new BadRequestException('결제는 완료되었으나 시스템 오류가 발생했습니다. 고객센터에 문의해주세요.');
+      }
 
       // 구독 생성 또는 업데이트 (결제 성공 후에만!)
       let subscription: Subscription;
 
-      if (!user.subscription) {
-        // 새 구독 생성
-        subscription = this.em.create(Subscription, {
-          user,
-          plan,
-          status: SubscriptionStatus.ACTIVE,
-          customerKey,
-          billingKey,
-          monthlyScansLimit: 0,
-          usedScans: 0,
-          currentPeriodStart: new Date(),
-          currentPeriodEnd: this.getNextBillingDate(),
-          nextBillingDate: this.getNextBillingDate(),
-          lastBillingDate: new Date(),
-        });
-        subscription.setMonthlyScansLimit();
-        await this.em.persistAndFlush(subscription);
-        this.logger.log(`[COMPLETE_BILLING_AUTH] Created new subscription for user ${userId}`);
-      } else {
-        // 기존 구독 업데이트
-        subscription = user.subscription;
-        subscription.plan = plan;
-        subscription.customerKey = customerKey;
-        subscription.billingKey = billingKey;
-        subscription.status = SubscriptionStatus.ACTIVE;
-        subscription.currentPeriodStart = new Date();
-        subscription.currentPeriodEnd = this.getNextBillingDate();
-        subscription.nextBillingDate = this.getNextBillingDate();
-        subscription.lastBillingDate = new Date();
-        subscription.setMonthlyScansLimit();
+      try {
+        if (!user.subscription) {
+          // 새 구독 생성
+          subscription = this.em.create(Subscription, {
+            user,
+            plan,
+            status: SubscriptionStatus.ACTIVE,
+            customerKey,
+            billingKey,
+            monthlyScansLimit: 0,
+            usedScans: 0,
+            currentPeriodStart: new Date(),
+            currentPeriodEnd: this.getNextBillingDate(),
+            nextBillingDate: this.getNextBillingDate(),
+            lastBillingDate: new Date(),
+          });
+          subscription.setMonthlyScansLimit();
+          await this.em.persistAndFlush(subscription);
+          this.logger.log(`[COMPLETE_BILLING_AUTH] Created new subscription for user ${userId}`);
+        } else {
+          // 기존 구독 업데이트
+          subscription = user.subscription;
+          subscription.plan = plan;
+          subscription.customerKey = customerKey;
+          subscription.billingKey = billingKey;
+          subscription.status = SubscriptionStatus.ACTIVE;
+          subscription.currentPeriodStart = new Date();
+          subscription.currentPeriodEnd = this.getNextBillingDate();
+          subscription.nextBillingDate = this.getNextBillingDate();
+          subscription.lastBillingDate = new Date();
+          subscription.setMonthlyScansLimit();
+          await this.em.flush();
+          this.logger.log(`[COMPLETE_BILLING_AUTH] Updated subscription for user ${userId}`);
+        }
+
+        // 로그 7: 구독 업데이트 성공
+        paymentLog.status = PaymentLogStatus.SUBSCRIPTION_UPDATE_SUCCESS;
+        paymentLog.message = '구독 정보 업데이트 성공';
         await this.em.flush();
-        this.logger.log(`[COMPLETE_BILLING_AUTH] Updated subscription for user ${userId}`);
+
+      } catch (subError) {
+        // 로그 8: 구독 업데이트 실패
+        paymentLog.status = PaymentLogStatus.SUBSCRIPTION_UPDATE_FAILED;
+        paymentLog.message = '구독 정보 업데이트 실패';
+        paymentLog.errorData = {
+          ...paymentLog.errorData,
+          subError: subError instanceof Error ? subError.message : String(subError),
+          stack: subError instanceof Error ? subError.stack : undefined,
+        };
+        await this.em.flush();
+
+        this.logger.error(`[COMPLETE_BILLING_AUTH] Subscription update failed for user ${userId}:`, subError);
+        throw new BadRequestException('결제는 완료되었으나 구독 정보 업데이트에 실패했습니다. 고객센터에 문의해주세요.');
       }
+
+      // 로그 9: 모든 프로세스 완료
+      paymentLog.status = PaymentLogStatus.COMPLETED;
+      paymentLog.message = '결제 프로세스 완료';
+      await this.em.flush();
 
       this.logger.log(`[COMPLETE_BILLING_AUTH] Subscription activated for user ${userId}, plan: ${plan}`);
 
       return subscription;
     } catch (error) {
-      this.logger.error(`[COMPLETE_BILLING_AUTH] First payment failed for user ${userId}:`, error);
-      throw new BadRequestException('첫 결제가 실패했습니다. 카드 정보를 확인해주세요.');
+      // 로그 10: 전체 실패
+      if (paymentLog.status !== PaymentLogStatus.DB_SAVE_FAILED &&
+          paymentLog.status !== PaymentLogStatus.SUBSCRIPTION_UPDATE_FAILED &&
+          paymentLog.status !== PaymentLogStatus.TOSS_FAILED) {
+        paymentLog.status = PaymentLogStatus.FAILED;
+        paymentLog.message = '결제 프로세스 실패';
+        paymentLog.errorData = {
+          ...paymentLog.errorData,
+          generalError: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        };
+        await this.em.flush();
+      }
+
+      this.logger.error(`[COMPLETE_BILLING_AUTH] Payment process failed for user ${userId}:`, error);
+      throw error;
     }
   }
 
