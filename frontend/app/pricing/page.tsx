@@ -239,12 +239,12 @@ export default function PricingPage() {
 
                 <div className="mb-6">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-bold">
+                    <span className="text-3xl font-bold">
                       {plan.price === 0 ? "₩0" : `₩${plan.price.toLocaleString()}`}
                     </span>
-                    <span className="text-gray-600">/{plan.period}</span>
+                    <span className="text-sm text-gray-600">/{plan.period}</span>
                   </div>
-                  <div className="mt-2 text-sm text-gray-600">
+                  <div className="mt-2 text-xs text-gray-600">
                     월 {plan.scans}회 스캔
                   </div>
                 </div>
