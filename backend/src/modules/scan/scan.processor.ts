@@ -73,6 +73,10 @@ export class ScanProcessor extends WorkerHost {
       // Note: Nuclei requires Docker and may fail in some environments
       this.logger.log(`[SCANNERS_START] Starting parallel scanners for scan ${scanId}`);
       this.scanGateway.sendProgress(scanId, 5, '기본 보안 스캐너 시작 중...');
+      this.scanGateway.sendProgress(scanId, 10, 'HTTP 헤더 보안 검사 중...');
+      this.scanGateway.sendProgress(scanId, 15, 'SSL/TLS 인증서 검증 중...');
+      this.scanGateway.sendProgress(scanId, 20, '웹 기술 스택 분석 중...');
+      this.scanGateway.sendProgress(scanId, 25, '포트 스캔 진행 중...');
       const startTime = Date.now();
 
       const [
@@ -102,9 +106,10 @@ export class ScanProcessor extends WorkerHost {
       this.logger.log(`[SCANNERS_DONE] Basic scanners completed in ${Date.now() - startTime}ms`);
       this.logger.log(`[SCANNERS_RESULT] Headers: ${headersResult.findings.length} findings, SSL: ${sslResult.findings.length} findings, WebRecon: ${webReconResult.findings.length} findings, Ports: ${portScanResult.findings.length} findings`);
 
-      // Update progress: 30% - Basic scanners completed
-      await job.updateProgress(30);
-      this.scanGateway.sendProgress(scanId, 30, '기본 스캔 완료', {
+      // Update progress: 40% - Basic scanners completed
+      await job.updateProgress(40);
+      this.scanGateway.sendProgress(scanId, 35, '기본 스캔 분석 중...');
+      this.scanGateway.sendProgress(scanId, 40, '기본 스캔 완료', {
         headers: headersResult.findings.length,
         ssl: sslResult.findings.length,
         webRecon: webReconResult.findings.length,
@@ -115,7 +120,7 @@ export class ScanProcessor extends WorkerHost {
       this.logger.log(`[ADVANCED_SCANNERS_START] Starting Nuclei and ZAP scans for scan ${scanId}`);
       this.scanGateway.sendProgress(
         scanId,
-        35,
+        45,
         '고급 스캔 시작 중 (5-15분 소요)...',
       );
       const advancedStartTime = Date.now();
@@ -137,20 +142,20 @@ export class ScanProcessor extends WorkerHost {
       this.logger.log(`[ADVANCED_SCANNERS] Running Nuclei + ZAP Baseline (passive scan)`);
 
       // Track current progress to prevent going backwards
-      let currentOverallProgress = 35;
+      let currentOverallProgress = 45;
 
-      // Nuclei progress: 35% ~ 47.5% (12.5% range)
+      // Nuclei progress: 45% ~ 67.5% (22.5% range)
       const nucleiProgressCallback = (percent: number, message?: string) => {
-        const mappedProgress = Math.round(35 + (percent * 0.125));
+        const mappedProgress = Math.round(45 + (percent * 0.225));
         if (mappedProgress > currentOverallProgress) {
           currentOverallProgress = mappedProgress;
           this.scanGateway.sendProgress(scanId, mappedProgress, `고급 스캔 (Nuclei): ${message || `${percent}%`}`);
         }
       };
 
-      // ZAP progress: 47.5% ~ 60% (12.5% range)
+      // ZAP progress: 67.5% ~ 90% (22.5% range)
       const zapProgressCallback = (percent: number, message?: string) => {
-        const mappedProgress = Math.round(47.5 + (percent * 0.125));
+        const mappedProgress = Math.round(67.5 + (percent * 0.225));
         if (mappedProgress > currentOverallProgress) {
           currentOverallProgress = mappedProgress;
           this.scanGateway.sendProgress(scanId, mappedProgress, `고급 스캔 (ZAP): ${message || `${percent}%`}`);
@@ -182,9 +187,9 @@ export class ScanProcessor extends WorkerHost {
 
       this.logger.log(`[ADVANCED_SCANNERS_DONE] Advanced scanners completed in ${Date.now() - advancedStartTime}ms`);
 
-      // Update progress: 60% - Advanced scanners completed
-      await job.updateProgress(60);
-      this.scanGateway.sendProgress(scanId, 60, '고급 스캔 완료', {
+      // Update progress: 90% - Advanced scanners completed
+      await job.updateProgress(90);
+      this.scanGateway.sendProgress(scanId, 90, '고급 스캔 완료', {
         nuclei: nucleiResult.findings.length,
         zap: zapResult.findings.length,
       }, true);
@@ -231,15 +236,15 @@ export class ScanProcessor extends WorkerHost {
 
       // Apply deduplication
       const allFindings = this.deduplicateFindings(rawFindings);
-      this.scanGateway.sendProgress(scanId, 65, '중복 제거 중...', {
+      this.scanGateway.sendProgress(scanId, 90, '취약점 중복 제거 중...', {
         before: rawFindings.length,
         after: allFindings.length,
         removed: rawFindings.length - allFindings.length,
       }, true);
 
-      // Update progress: 70% - Analyzing findings
-      await job.updateProgress(70);
-      this.scanGateway.sendProgress(scanId, 70, '보안 점수 계산 중...', {}, true);
+      // Update progress: 92% - Analyzing findings
+      await job.updateProgress(92);
+      this.scanGateway.sendProgress(scanId, 92, '보안 점수 계산 중...', {}, true);
 
       // Calculate score
       this.logger.log(`[SCORE_START] Calculating score for scan ${scanId}`);
@@ -248,7 +253,8 @@ export class ScanProcessor extends WorkerHost {
 
       // Save vulnerabilities to database
       this.logger.log(`[DB_SAVE_START] Saving ${allFindings.length} vulnerabilities to database`);
-      this.scanGateway.sendProgress(scanId, 75, `${allFindings.length}개 취약점 저장 중...`, {}, true);
+      this.scanGateway.sendProgress(scanId, 93, '취약점 데이터 준비 중...', {}, true);
+      this.scanGateway.sendProgress(scanId, 94, `${allFindings.length}개 취약점 저장 중...`, {}, true);
       const vulnerabilities = [];
       let aiExplanationsCount = 0;
 
@@ -272,9 +278,9 @@ export class ScanProcessor extends WorkerHost {
 
       this.logger.log(`[DB_SAVE_DONE] Saved ${vulnerabilities.length} vulnerabilities (${aiExplanationsCount} with AI explanations)`);
 
-      // Update progress: 85% - Vulnerabilities saved
-      await job.updateProgress(85);
-      this.scanGateway.sendProgress(scanId, 85, '취약점 저장 완료', {
+      // Update progress: 95% - Vulnerabilities saved
+      await job.updateProgress(95);
+      this.scanGateway.sendProgress(scanId, 95, '취약점 저장 완료', {
         total: vulnerabilities.length,
         withAI: aiExplanationsCount,
       }, true);
@@ -283,7 +289,7 @@ export class ScanProcessor extends WorkerHost {
       let aiSummary = '';
       if (scan.isPaid) {
         this.logger.log(`[AI_SUMMARY_START] Generating AI summary for paid scan ${scanId}`);
-        this.scanGateway.sendProgress(scanId, 90, 'AI 요약 생성 중...', {}, true);
+        this.scanGateway.sendProgress(scanId, 96, 'AI 요약 생성 중...', {}, true);
         try {
           aiSummary = await this.aiService.generateScanSummary(
             allFindings,
@@ -294,13 +300,14 @@ export class ScanProcessor extends WorkerHost {
           this.logger.error(`[AI_SUMMARY_ERROR] Failed to generate AI summary: ${e.message}`);
         }
         // Don't update DB here - will be saved together with final results
-        this.scanGateway.sendProgress(scanId, 95, 'AI 요약 생성 완료', {}, true);
+        this.scanGateway.sendProgress(scanId, 97, 'AI 요약 생성 완료', {}, true);
       } else {
         this.logger.log(`[AI_SUMMARY_SKIP] Skipping AI summary for free scan ${scanId}`);
       }
 
-      // Update progress: 95%
-      await job.updateProgress(95);
+      // Update progress: 98%
+      await job.updateProgress(98);
+      this.scanGateway.sendProgress(scanId, 98, '최종 결과 저장 중...', {}, true);
 
       // Update scan with results
       this.logger.log(`[FINALIZE_START] Updating scan ${scanId} with final results`);

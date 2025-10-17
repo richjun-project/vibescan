@@ -51,8 +51,8 @@ export abstract class BaseScannerService {
       let duplicateCount = 0;
       const DUPLICATE_THRESHOLD = 3; // Show first 3 duplicates, then summarize
 
-      // Track progress for throttling (report every 5%)
-      let lastReportedPercent = -5;
+      // Track progress for throttling (report every 2% for more frequent updates)
+      let lastReportedPercent = -2;
 
       // Real-time stdout logging
       process.stdout.on('data', (data: Buffer) => {
@@ -80,8 +80,8 @@ export abstract class BaseScannerService {
               const progressData = JSON.parse(normalizedLine);
               if (progressData.percent !== undefined) {
                 const currentPercent = parseInt(progressData.percent);
-                // Report every 5% or at completion
-                if (currentPercent >= lastReportedPercent + 5 || currentPercent >= 99) {
+                // Report every 2% for more granular updates, or at completion
+                if (currentPercent >= lastReportedPercent + 2 || currentPercent >= 99) {
                   lastReportedPercent = currentPercent;
                   // Build detailed message with requests
                   const requests = progressData.requests || 0;
