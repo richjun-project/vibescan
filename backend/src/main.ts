@@ -8,7 +8,9 @@ async function bootstrap() {
   // Enable CORS
   const allowedOrigins = [
     process.env.FRONTEND_URL || 'http://localhost:3001',
-    'https://ourvibescan.netlify.app',  // Production Netlify app
+    'https://vibescan.co.kr',  // New custom domain (main)
+    'https://www.vibescan.co.kr',  // New custom domain (www)
+    'https://ourvibescan.netlify.app',  // Production Netlify app (backup)
     'https://*.netlify.app',  // Netlify 배포된 앱
     'https://*.netlify.com',   // Netlify 프리뷰 배포
   ];
