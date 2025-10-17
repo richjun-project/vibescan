@@ -149,8 +149,12 @@ export default function ScanDetailPage() {
     })
 
     let disconnectTimer: NodeJS.Timeout | null = null
+    let connectionFailures = 0
+    const MAX_FAILURES = 3
 
     socket.on("connect", () => {
+      console.log("WebSocket connected")
+      connectionFailures = 0 // Reset failure count on successful connection
       socket.emit("subscribe-scan", parseInt(scanId))
       // Clear disconnect timer on successful reconnection
       if (disconnectTimer) {
@@ -190,27 +194,41 @@ export default function ScanDetailPage() {
     })
 
     socket.on("disconnect", (reason: string) => {
-      // If scan is running and connection is lost, wait 10 seconds then redirect
-      if ((scan?.status === "running" || scan?.status === "pending") && !disconnectTimer) {
+      console.warn("WebSocket disconnected:", reason)
+
+      // io client disconnect는 정상 종료이므로 무시
+      if (reason === "io client disconnect") return
+
+      // 서버 측 disconnect는 즉시 처리
+      if (!disconnectTimer) {
         disconnectTimer = setTimeout(() => {
           toast.error("서버 연결이 끊겼습니다", {
             description: "대시보드로 이동합니다.",
           })
           router.push("/dashboard")
-        }, 10000) // Wait 10 seconds for reconnection
+        }, 5000) // 5초로 단축
       }
     })
 
     socket.on("connect_error", (error: Error) => {
-      // Connection error during active scan
-      if ((scan?.status === "running" || scan?.status === "pending") && !disconnectTimer) {
-        disconnectTimer = setTimeout(() => {
-          toast.error("서버에 연결할 수 없습니다", {
-            description: "대시보드로 이동합니다.",
-          })
-          router.push("/dashboard")
-        }, 10000)
+      console.error("WebSocket connection error:", error)
+      connectionFailures++
+
+      // 연속 3회 실패 시 즉시 리다이렉트
+      if (connectionFailures >= MAX_FAILURES) {
+        toast.error("서버에 연결할 수 없습니다", {
+          description: "대시보드로 이동합니다.",
+        })
+        setTimeout(() => router.push("/dashboard"), 2000)
       }
+    })
+
+    socket.on("reconnect_failed", () => {
+      console.error("WebSocket reconnection failed")
+      toast.error("서버 재연결에 실패했습니다", {
+        description: "대시보드로 이동합니다.",
+      })
+      setTimeout(() => router.push("/dashboard"), 2000)
     })
 
     return () => {
@@ -1005,17 +1023,31 @@ export default function ScanDetailPage() {
           </div>
 
           {!scan.vulnerabilities || scan.vulnerabilities.length === 0 ? (
-            <div className="text-center py-20 p-8 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-dashed border-green-300 rounded-2xl">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
-                <CheckCircle2 className="w-10 h-10 text-green-600" />
+            scan.status === 'failed' ? (
+              <div className="text-center py-20 p-8 bg-gradient-to-br from-red-50 to-orange-50 border-2 border-dashed border-red-300 rounded-2xl">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
+                  <AlertTriangle className="w-10 h-10 text-red-600" />
+                </div>
+                <div className="text-xl font-semibold text-gray-900 mb-2">
+                  스캔이 실패했습니다
+                </div>
+                <div className="text-gray-600">
+                  스캔 중 오류가 발생했습니다. 다시 시도해주세요.
+                </div>
               </div>
-              <div className="text-xl font-semibold text-gray-900 mb-2">
-                취약점이 발견되지 않았습니다
+            ) : (
+              <div className="text-center py-20 p-8 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-dashed border-green-300 rounded-2xl">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
+                  <CheckCircle2 className="w-10 h-10 text-green-600" />
+                </div>
+                <div className="text-xl font-semibold text-gray-900 mb-2">
+                  취약점이 발견되지 않았습니다
+                </div>
+                <div className="text-gray-600">
+                  사이트가 안전한 것으로 보입니다
+                </div>
               </div>
-              <div className="text-gray-600">
-                사이트가 안전한 것으로 보입니다
-              </div>
-            </div>
+            )
           ) : (
             <div className="space-y-3">
               {scan.vulnerabilities.map((vuln) => {
