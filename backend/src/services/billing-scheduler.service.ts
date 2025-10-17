@@ -219,6 +219,7 @@ export class BillingSchedulerService {
   private getPlanPrice(plan: SubscriptionPlan): number {
     const prices: Record<SubscriptionPlan, number> = {
       [SubscriptionPlan.FREE]: 0,
+      [SubscriptionPlan.STARTER]: 9900,
       [SubscriptionPlan.PRO]: 29900,
       [SubscriptionPlan.BUSINESS]: 99900,
       [SubscriptionPlan.ENTERPRISE]: 0, // Enterprise는 별도 계약
