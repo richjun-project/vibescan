@@ -143,10 +143,20 @@ export default function ScanDetailPage() {
     const wsUrl = backendUrl.replace(/\/api$/, "") // Remove /api suffix if present
     const socket = io(`${wsUrl}/scans`, {
       transports: ["websocket"],
+      reconnection: true,
+      reconnectionAttempts: 3,
+      reconnectionDelay: 1000,
     })
+
+    let disconnectTimer: NodeJS.Timeout | null = null
 
     socket.on("connect", () => {
       socket.emit("subscribe-scan", parseInt(scanId))
+      // Clear disconnect timer on successful reconnection
+      if (disconnectTimer) {
+        clearTimeout(disconnectTimer)
+        disconnectTimer = null
+      }
     })
 
     socket.on("scan-progress", (data: any) => {
@@ -172,14 +182,41 @@ export default function ScanDetailPage() {
         toast.error("스캔 실패", {
           description: data.error,
         })
+        // Redirect to dashboard after showing error
+        setTimeout(() => {
+          router.push("/dashboard")
+        }, 3000)
       }
     })
 
-    socket.on("disconnect", () => {
-      // WebSocket disconnected
+    socket.on("disconnect", (reason: string) => {
+      // If scan is running and connection is lost, wait 10 seconds then redirect
+      if ((scan?.status === "running" || scan?.status === "pending") && !disconnectTimer) {
+        disconnectTimer = setTimeout(() => {
+          toast.error("서버 연결이 끊겼습니다", {
+            description: "대시보드로 이동합니다.",
+          })
+          router.push("/dashboard")
+        }, 10000) // Wait 10 seconds for reconnection
+      }
+    })
+
+    socket.on("connect_error", (error: Error) => {
+      // Connection error during active scan
+      if ((scan?.status === "running" || scan?.status === "pending") && !disconnectTimer) {
+        disconnectTimer = setTimeout(() => {
+          toast.error("서버에 연결할 수 없습니다", {
+            description: "대시보드로 이동합니다.",
+          })
+          router.push("/dashboard")
+        }, 10000)
+      }
     })
 
     return () => {
+      if (disconnectTimer) {
+        clearTimeout(disconnectTimer)
+      }
       socket.emit("unsubscribe-scan", parseInt(scanId))
       socket.disconnect()
     }

@@ -1,10 +1,11 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { Logger } from '@nestjs/common';
+import { Logger, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { Scan, ScanStatus } from '../../entities/scan.entity';
 import { Vulnerability } from '../../entities/vulnerability.entity';
+import { Subscription } from '../../entities/subscription.entity';
 import { NucleiScannerService } from '../../services/scanners/nuclei-scanner.service';
 import { ZapScannerService } from '../../services/scanners/zap-scanner.service';
 import { SecurityHeadersScannerService } from '../../services/scanners/security-headers-scanner.service';
@@ -23,7 +24,7 @@ import { ScanGateway } from './scan.gateway';
   },
   lockDuration: 30 * 60 * 1000, // 30분 작업 락 (이 시간동안 작업이 완료되지 않으면 다른 워커가 재시도 가능)
 })
-export class ScanProcessor extends WorkerHost {
+export class ScanProcessor extends WorkerHost implements OnModuleInit {
   private readonly logger = new Logger(ScanProcessor.name);
 
   constructor(
@@ -31,6 +32,8 @@ export class ScanProcessor extends WorkerHost {
     private readonly scanRepository: EntityRepository<Scan>,
     @InjectRepository(Vulnerability)
     private readonly vulnerabilityRepository: EntityRepository<Vulnerability>,
+    @InjectRepository(Subscription)
+    private readonly subscriptionRepository: EntityRepository<Subscription>,
     private readonly nucleiScanner: NucleiScannerService,
     private readonly zapScanner: ZapScannerService,
     private readonly headersScanner: SecurityHeadersScannerService,
@@ -43,6 +46,100 @@ export class ScanProcessor extends WorkerHost {
     private readonly em: EntityManager,
   ) {
     super();
+  }
+
+  /**
+   * 서버 시작 시 중단된 스캔 복구
+   * - RUNNING 상태인 스캔을 FAILED로 변경
+   * - 사용자의 usedScans를 1 감소 (스캔 횟수 롤백)
+   */
+  async onModuleInit() {
+    this.logger.log('[RECOVERY_START] Checking for interrupted scans...');
+
+    try {
+      // Find all scans that were RUNNING when server stopped
+      const interruptedScans = await this.scanRepository.find(
+        { status: ScanStatus.RUNNING },
+        { populate: ['user'] } // user relation 포함
+      );
+
+      if (interruptedScans.length === 0) {
+        this.logger.log('[RECOVERY] No interrupted scans found');
+        return;
+      }
+
+      this.logger.warn(`[RECOVERY] Found ${interruptedScans.length} interrupted scans`);
+
+      let recoveredCount = 0;
+      let rollbackCount = 0;
+
+      for (const scan of interruptedScans) {
+        try {
+          this.logger.log(`[RECOVERY] Processing scan ${scan.id} (was at ${scan.progress}%)`);
+
+          // Mark scan as FAILED
+          scan.status = ScanStatus.FAILED;
+          scan.progress = 0;
+          scan.progressMessage = '서버 중단으로 인한 스캔 실패';
+          scan.results = {
+            error: 'Server interrupted',
+            reason: '스캔 실행 중 서버가 중단되었습니다',
+            recoveredAt: new Date().toISOString(),
+          };
+
+          await this.em.persistAndFlush(scan);
+          recoveredCount++;
+          this.logger.log(`[RECOVERY] Scan ${scan.id} marked as FAILED`);
+
+          // Rollback user's scan count
+          try {
+            const subscription = await this.subscriptionRepository.findOne({
+              user: scan.user.id,
+            });
+
+            if (subscription && subscription.usedScans > 0) {
+              subscription.usedScans -= 1;
+              await this.em.persistAndFlush(subscription);
+              rollbackCount++;
+              this.logger.log(
+                `[RECOVERY] Rolled back scan count for user ${scan.user.id} (${subscription.usedScans + 1} → ${subscription.usedScans})`
+              );
+            } else if (subscription) {
+              this.logger.warn(
+                `[RECOVERY] User ${scan.user.id} has no scans to rollback (usedScans: ${subscription.usedScans})`
+              );
+            } else {
+              this.logger.warn(
+                `[RECOVERY] No subscription found for user ${scan.user.id}`
+              );
+            }
+          } catch (subError) {
+            this.logger.error(
+              `[RECOVERY] Failed to rollback scan count for user ${scan.user.id}: ${subError.message}`
+            );
+          }
+
+          // Send WebSocket notification to client
+          this.scanGateway.sendFailed(
+            scan.id,
+            '서버가 재시작되어 스캔이 중단되었습니다. 스캔 횟수가 복구되었으니 다시 시도해주세요.'
+          );
+
+        } catch (error) {
+          this.logger.error(
+            `[RECOVERY] Failed to recover scan ${scan.id}: ${error.message}`
+          );
+        }
+      }
+
+      this.logger.log(
+        `[RECOVERY_DONE] Recovered ${recoveredCount}/${interruptedScans.length} scans, rolled back ${rollbackCount} scan counts`
+      );
+    } catch (error) {
+      this.logger.error(
+        `[RECOVERY_ERROR] Failed to check for interrupted scans: ${error.message}`
+      );
+    }
   }
 
   async process(job: Job): Promise<any> {
