@@ -7,6 +7,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Check, ArrowRight, Sparkles, Shield, Zap, Building2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 const SUBSCRIPTION_PLANS = [
   {
@@ -124,9 +125,23 @@ export default function PricingPage() {
     }
 
     if (planId === "free") {
-      // Check if user already has an active subscription
-      if (subscription && subscription.status === 'active') {
-        alert('이미 활성화된 구독이 있습니다. 대시보드에서 현재 플랜을 확인해주세요.')
+      // Check if user already has an active paid subscription
+      if (subscription && subscription.status === 'active' && subscription.plan !== 'free') {
+        const planNames: Record<string, string> = {
+          'starter': 'Starter',
+          'pro': 'Pro',
+          'business': 'Business',
+          'enterprise': 'Enterprise',
+        }
+        const currentPlanName = planNames[subscription.plan] || subscription.plan.toUpperCase()
+
+        toast.error("무료 플랜으로 변경할 수 없습니다", {
+          description: `현재 ${currentPlanName} 플랜을 이용 중입니다. 무료 플랜으로 변경하려면 대시보드에서 구독을 취소해주세요.`,
+          action: {
+            label: "대시보드로 이동",
+            onClick: () => router.push("/dashboard")
+          }
+        })
         return
       }
       // Free plan is automatically assigned on signup
