@@ -97,4 +97,50 @@
   .animate-shimmer {
     animation: shimmer 3s ease-in-out infinite;
   }
+
+  /* Subtle pulse animation for icons */
+  @keyframes subtle-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+  }
+
+  .animate-subtle-pulse {
+    animation: subtle-pulse 2s ease-in-out infinite;
+  }
+
+  /* Ring pulse animation for active step indicators */
+  @keyframes ring-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scale(1.15);
+      opacity: 0.2;
+    }
+  }
+
+  .animate-ring-pulse {
+    animation: ring-pulse 2s ease-in-out infinite;
+  }
+
+  /* Text fade animation for rotating messages */
+  @keyframes text-fade {
+    0%, 90%, 100% {
+      opacity: 1;
+    }
+    45%, 55% {
+      opacity: 0;
+    }
+  }
+
+  .animate-text-fade {
+    animation: text-fade 4s ease-in-out infinite;
+  }
 }

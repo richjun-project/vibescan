@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -84,6 +84,26 @@ export default function ScanDetailPage() {
   const [progressMessage, setProgressMessage] = useState<string>("")
   const [paymentModalOpen, setPaymentModalOpen] = useState(false)
   const [expandedVulns, setExpandedVulns] = useState<Set<number>>(new Set())
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0)
+
+  // Rotating motivational messages from homepage benefits
+  const motivationalMessages = useMemo(() => [
+    "12,000+ 취약점 패턴으로 완벽 탐지합니다",
+    "실시간 웹 취약점을 정밀하게 스캐닝합니다",
+    "500+ 시크릿 키 노출을 사전 차단합니다",
+    "최신 보안 위협에 매일 자동 업데이트됩니다",
+    "AI가 우선순위를 분석하여 가이드합니다",
+  ], [])
+
+  // Rotate messages every 4 seconds
+  useEffect(() => {
+    if (scan?.status === "running" || scan?.status === "pending") {
+      const interval = setInterval(() => {
+        setCurrentMessageIndex((prev) => (prev + 1) % motivationalMessages.length)
+      }, 4000)
+      return () => clearInterval(interval)
+    }
+  }, [scan?.status, motivationalMessages.length])
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken")
@@ -460,9 +480,15 @@ export default function ScanDetailPage() {
               {scan.domain}
             </p>
             <div className="w-24 h-24 mx-auto my-8 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 border-4 border-blue-200 flex items-center justify-center shadow-lg">
-              <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+              <Shield className="w-12 h-12 text-blue-600 animate-subtle-pulse" />
             </div>
-            <p className="text-sm text-gray-500">
+            <p
+              key={currentMessageIndex}
+              className="text-sm text-gray-600 font-medium animate-text-fade"
+            >
+              {motivationalMessages[currentMessageIndex]}
+            </p>
+            <p className="text-xs text-gray-400 mt-2">
               일반적으로 5-10분 소요됩니다
             </p>
           </div>
@@ -478,7 +504,7 @@ export default function ScanDetailPage() {
             <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-hidden shadow-inner">
               <div
                 className={cn(
-                  "h-full transition-all duration-700 ease-out rounded-full",
+                  "h-full transition-all duration-700 ease-out rounded-full relative",
                   progress === 0
                     ? "bg-gradient-to-r from-gray-400 to-gray-500"
                     : progress < 30
@@ -487,9 +513,13 @@ export default function ScanDetailPage() {
                     ? "bg-gradient-to-r from-purple-500 to-purple-600"
                     : "bg-gradient-to-r from-green-500 to-emerald-600"
                 )}
-                style={{ width: `${Math.max(progress, 3)}%` }}
+                style={{
+                  width: `${Math.max(progress, 3)}%`,
+                  backgroundSize: '200% 100%',
+                }}
               >
-                <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"
+                     style={{ backgroundSize: '200% 100%' }} />
               </div>
             </div>
 
@@ -499,17 +529,22 @@ export default function ScanDetailPage() {
                 "text-center transition-all",
                 progress >= 5 ? 'opacity-100' : 'opacity-40'
               )}>
-                <div className={cn(
-                  "w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center transition-all shadow-sm",
-                  progress >= 5
-                    ? 'bg-blue-600 scale-110'
-                    : 'bg-gray-300'
-                )}>
-                  {progress >= 5 ? (
-                    <Check className="w-5 h-5 text-white" />
-                  ) : (
-                    <span className="text-xs font-bold text-white">1</span>
+                <div className="relative inline-block">
+                  {progress >= 0 && progress < 5 && (
+                    <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-blue-400 animate-ring-pulse" />
                   )}
+                  <div className={cn(
+                    "w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center transition-all shadow-sm",
+                    progress >= 5
+                      ? 'bg-blue-600 scale-110'
+                      : 'bg-gray-300'
+                  )}>
+                    {progress >= 5 ? (
+                      <Check className="w-5 h-5 text-white" />
+                    ) : (
+                      <span className="text-xs font-bold text-white">1</span>
+                    )}
+                  </div>
                 </div>
                 <span className={cn(
                   "text-xs font-medium",
@@ -520,17 +555,22 @@ export default function ScanDetailPage() {
                 "text-center transition-all",
                 progress >= 30 ? 'opacity-100' : 'opacity-40'
               )}>
-                <div className={cn(
-                  "w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center transition-all shadow-sm",
-                  progress >= 30
-                    ? 'bg-purple-600 scale-110'
-                    : 'bg-gray-300'
-                )}>
-                  {progress >= 30 ? (
-                    <Check className="w-5 h-5 text-white" />
-                  ) : (
-                    <span className="text-xs font-bold text-white">2</span>
+                <div className="relative inline-block">
+                  {progress >= 5 && progress < 30 && (
+                    <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-purple-400 animate-ring-pulse" />
                   )}
+                  <div className={cn(
+                    "w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center transition-all shadow-sm",
+                    progress >= 30
+                      ? 'bg-purple-600 scale-110'
+                      : 'bg-gray-300'
+                  )}>
+                    {progress >= 30 ? (
+                      <Check className="w-5 h-5 text-white" />
+                    ) : (
+                      <span className="text-xs font-bold text-white">2</span>
+                    )}
+                  </div>
                 </div>
                 <span className={cn(
                   "text-xs font-medium",
@@ -541,17 +581,22 @@ export default function ScanDetailPage() {
                 "text-center transition-all",
                 progress >= 60 ? 'opacity-100' : 'opacity-40'
               )}>
-                <div className={cn(
-                  "w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center transition-all shadow-sm",
-                  progress >= 60
-                    ? 'bg-indigo-600 scale-110'
-                    : 'bg-gray-300'
-                )}>
-                  {progress >= 60 ? (
-                    <Check className="w-5 h-5 text-white" />
-                  ) : (
-                    <span className="text-xs font-bold text-white">3</span>
+                <div className="relative inline-block">
+                  {progress >= 30 && progress < 60 && (
+                    <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-indigo-400 animate-ring-pulse" />
                   )}
+                  <div className={cn(
+                    "w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center transition-all shadow-sm",
+                    progress >= 60
+                      ? 'bg-indigo-600 scale-110'
+                      : 'bg-gray-300'
+                  )}>
+                    {progress >= 60 ? (
+                      <Check className="w-5 h-5 text-white" />
+                    ) : (
+                      <span className="text-xs font-bold text-white">3</span>
+                    )}
+                  </div>
                 </div>
                 <span className={cn(
                   "text-xs font-medium",
@@ -562,17 +607,22 @@ export default function ScanDetailPage() {
                 "text-center transition-all",
                 progress >= 100 ? 'opacity-100' : 'opacity-40'
               )}>
-                <div className={cn(
-                  "w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center transition-all shadow-sm",
-                  progress >= 100
-                    ? 'bg-green-600 scale-110'
-                    : 'bg-gray-300'
-                )}>
-                  {progress >= 100 ? (
-                    <Check className="w-5 h-5 text-white" />
-                  ) : (
-                    <span className="text-xs font-bold text-white">4</span>
+                <div className="relative inline-block">
+                  {progress >= 60 && progress < 100 && (
+                    <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-green-400 animate-ring-pulse" />
                   )}
+                  <div className={cn(
+                    "w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center transition-all shadow-sm",
+                    progress >= 100
+                      ? 'bg-green-600 scale-110'
+                      : 'bg-gray-300'
+                  )}>
+                    {progress >= 100 ? (
+                      <Check className="w-5 h-5 text-white" />
+                    ) : (
+                      <span className="text-xs font-bold text-white">4</span>
+                    )}
+                  </div>
                 </div>
                 <span className={cn(
                   "text-xs font-medium",
