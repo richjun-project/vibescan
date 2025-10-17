@@ -33,7 +33,17 @@ function BillingAuthPageContent() {
 
   const completeBillingAuth = async (authKey: string, customerKey: string) => {
     try {
-      const result = await apiClient.completeBillingAuth(authKey, customerKey)
+      // Get plan from sessionStorage
+      const plan = sessionStorage.getItem('pendingSubscriptionPlan')
+
+      if (!plan) {
+        throw new Error('구독 플랜 정보를 찾을 수 없습니다')
+      }
+
+      const result = await apiClient.completeBillingAuth(authKey, customerKey, plan)
+
+      // Clear plan from sessionStorage
+      sessionStorage.removeItem('pendingSubscriptionPlan')
 
       setStatus("success")
       setMessage("구독이 성공적으로 시작되었습니다!")

@@ -3,6 +3,7 @@ import { User } from './user.entity';
 
 export enum SubscriptionPlan {
   FREE = 'free',
+  STARTER = 'starter',
   PRO = 'pro',
   BUSINESS = 'business',
   ENTERPRISE = 'enterprise',
@@ -99,6 +100,7 @@ export class Subscription {
   setMonthlyScansLimit(): void {
     const limits: Record<SubscriptionPlan, number> = {
       [SubscriptionPlan.FREE]: 1,
+      [SubscriptionPlan.STARTER]: 5,
       [SubscriptionPlan.PRO]: 10,
       [SubscriptionPlan.BUSINESS]: 50,
       [SubscriptionPlan.ENTERPRISE]: 999999, // 무제한 (실질적으로)

@@ -50,9 +50,9 @@ export class SubscriptionService {
   }
 
   /**
-   * 구독 시작 준비 (customerKey 생성)
+   * customerKey 생성 (구독 정보는 변경하지 않음)
    */
-  async initiateSubscription(userId: number, plan: SubscriptionPlan): Promise<{ customerKey: string }> {
+  async generateCustomerKey(userId: number, plan: SubscriptionPlan): Promise<{ customerKey: string; plan: SubscriptionPlan }> {
     if (plan === SubscriptionPlan.FREE) {
       throw new BadRequestException('Free 플랜은 구독할 수 없습니다.');
     }
@@ -62,50 +62,16 @@ export class SubscriptionService {
     // customerKey 생성 (토스페이먼츠 고객 식별자)
     const customerKey = `USER_${userId}_${crypto.randomBytes(8).toString('hex')}`;
 
-    // 구독이 없으면 생성
-    if (!user.subscription) {
-      const subscription = this.em.create(Subscription, {
-        user,
-        plan,
-        status: SubscriptionStatus.INCOMPLETE, // 빌링키 발급 대기
-        customerKey,
-        monthlyScansLimit: 0,
-        usedScans: 0,
-      });
-      subscription.setMonthlyScansLimit();
-      await this.em.persistAndFlush(subscription);
-      this.logger.log(`[INITIATE_SUBSCRIPTION] Created new subscription for user ${userId}, plan: ${plan}`);
-    } else {
-      // 기존 구독이 있으면 플랜 업데이트
-      user.subscription.plan = plan;
-      user.subscription.customerKey = customerKey;
-      user.subscription.status = SubscriptionStatus.INCOMPLETE;
-      user.subscription.setMonthlyScansLimit();
-      await this.em.flush();
-      this.logger.log(`[INITIATE_SUBSCRIPTION] Updated subscription for user ${userId}, plan: ${plan}`);
-    }
+    this.logger.log(`[GENERATE_CUSTOMER_KEY] Generated customerKey for user ${userId} for plan ${plan}: ${customerKey}`);
 
-    this.logger.log(`[INITIATE_SUBSCRIPTION] Generated customerKey for user ${userId}: ${customerKey}`);
-
-    return { customerKey };
+    return { customerKey, plan };
   }
 
   /**
    * 빌링키 발급 완료 처리 및 첫 결제 진행
    */
-  async completeBillingAuth(userId: number, authKey: string, customerKey: string): Promise<Subscription> {
-    const subscription = await this.subscriptionRepository.findOne(
-      { user: userId, customerKey },
-      { populate: ['user'] }
-    );
-
-    if (!subscription) {
-      throw new NotFoundException('구독 정보를 찾을 수 없습니다.');
-    }
-
-    if (subscription.status !== SubscriptionStatus.INCOMPLETE) {
-      throw new BadRequestException('이미 활성화된 구독입니다.');
-    }
+  async completeBillingAuth(userId: number, authKey: string, customerKey: string, plan: SubscriptionPlan): Promise<Subscription> {
+    const user = await this.userRepository.findOneOrFail({ id: userId }, { populate: ['subscription'] });
 
     // 토스페이먼츠에서 빌링키 발급
     const { billingKey } = await this.tossPaymentsService.issueBillingKey(authKey, customerKey);
@@ -113,8 +79,8 @@ export class SubscriptionService {
     this.logger.log(`[COMPLETE_BILLING_AUTH] Billing key issued for user ${userId}`);
 
     // 첫 결제 진행
-    const amount = this.getPlanPrice(subscription.plan);
-    const planName = this.getPlanDisplayName(subscription.plan);
+    const amount = this.getPlanPrice(plan);
+    const planName = this.getPlanDisplayName(plan);
 
     try {
       const paymentResult = await this.tossPaymentsService.processBillingPayment(
@@ -128,14 +94,14 @@ export class SubscriptionService {
 
       // 결제 기록 생성
       const payment = this.em.create(Payment, {
-        user: subscription.user,
+        user,
         orderId: paymentResult.orderId,
         paymentKey: paymentResult.paymentKey,
         orderName: `${planName} 플랜 첫 결제`,
         amount: paymentResult.amount,
         status: PaymentStatus.COMPLETED,
         method: paymentResult.method as any,
-        subscriptionPlan: subscription.plan,
+        subscriptionPlan: plan,
         isRecurring: true,
         billingKey,
         approvedAt: new Date(paymentResult.approvedAt),
@@ -143,24 +109,47 @@ export class SubscriptionService {
 
       await this.em.persistAndFlush(payment);
 
-      // 빌링키 저장 및 구독 활성화
-      subscription.billingKey = billingKey;
-      subscription.status = SubscriptionStatus.ACTIVE;
-      subscription.currentPeriodStart = new Date();
-      subscription.currentPeriodEnd = this.getNextBillingDate();
-      subscription.nextBillingDate = this.getNextBillingDate();
-      subscription.lastBillingDate = new Date();
+      // 구독 생성 또는 업데이트 (결제 성공 후에만!)
+      let subscription: Subscription;
 
-      await this.em.flush();
+      if (!user.subscription) {
+        // 새 구독 생성
+        subscription = this.em.create(Subscription, {
+          user,
+          plan,
+          status: SubscriptionStatus.ACTIVE,
+          customerKey,
+          billingKey,
+          monthlyScansLimit: 0,
+          usedScans: 0,
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: this.getNextBillingDate(),
+          nextBillingDate: this.getNextBillingDate(),
+          lastBillingDate: new Date(),
+        });
+        subscription.setMonthlyScansLimit();
+        await this.em.persistAndFlush(subscription);
+        this.logger.log(`[COMPLETE_BILLING_AUTH] Created new subscription for user ${userId}`);
+      } else {
+        // 기존 구독 업데이트
+        subscription = user.subscription;
+        subscription.plan = plan;
+        subscription.customerKey = customerKey;
+        subscription.billingKey = billingKey;
+        subscription.status = SubscriptionStatus.ACTIVE;
+        subscription.currentPeriodStart = new Date();
+        subscription.currentPeriodEnd = this.getNextBillingDate();
+        subscription.nextBillingDate = this.getNextBillingDate();
+        subscription.lastBillingDate = new Date();
+        subscription.setMonthlyScansLimit();
+        await this.em.flush();
+        this.logger.log(`[COMPLETE_BILLING_AUTH] Updated subscription for user ${userId}`);
+      }
 
-      this.logger.log(`[COMPLETE_BILLING_AUTH] Subscription ${subscription.id} activated for user ${userId}`);
+      this.logger.log(`[COMPLETE_BILLING_AUTH] Subscription activated for user ${userId}, plan: ${plan}`);
 
       return subscription;
     } catch (error) {
-      // 첫 결제 실패 시 구독 상태를 PAYMENT_FAILED로 변경
-      subscription.status = SubscriptionStatus.PAYMENT_FAILED;
-      await this.em.flush();
-
       this.logger.error(`[COMPLETE_BILLING_AUTH] First payment failed for user ${userId}:`, error);
       throw new BadRequestException('첫 결제가 실패했습니다. 카드 정보를 확인해주세요.');
     }
@@ -310,6 +299,7 @@ export class SubscriptionService {
   getPlanPrice(plan: SubscriptionPlan): number {
     const prices: Record<SubscriptionPlan, number> = {
       [SubscriptionPlan.FREE]: 0,
+      [SubscriptionPlan.STARTER]: 9900,
       [SubscriptionPlan.PRO]: 29900,
       [SubscriptionPlan.BUSINESS]: 99900,
       [SubscriptionPlan.ENTERPRISE]: 0, // 문의
@@ -328,11 +318,17 @@ export class SubscriptionService {
         monthlyScans: 1,
         features: ['월 1회 무료 스캔', '기본 보안 점검만'],
       },
+      starter: {
+        name: 'Starter',
+        price: 9900,
+        monthlyScans: 5,
+        features: ['월 5회 상세 스캔', 'AI 분석 + 수정 가이드', 'PDF 다운로드'],
+      },
       pro: {
         name: 'Pro',
         price: 29900,
         monthlyScans: 10,
-        features: ['월 10회 상세 스캔', 'AI 분석 + 수정 가이드', 'PDF 다운로드'],
+        features: ['월 10회 상세 스캔', 'AI 분석 + 수정 가이드', 'PDF 다운로드', '우선 지원'],
       },
       business: {
         name: 'Business',
@@ -365,6 +361,7 @@ export class SubscriptionService {
   private getPlanDisplayName(plan: SubscriptionPlan): string {
     const names: Record<SubscriptionPlan, string> = {
       [SubscriptionPlan.FREE]: 'Free',
+      [SubscriptionPlan.STARTER]: 'Starter',
       [SubscriptionPlan.PRO]: 'Pro',
       [SubscriptionPlan.BUSINESS]: 'Business',
       [SubscriptionPlan.ENTERPRISE]: 'Enterprise',

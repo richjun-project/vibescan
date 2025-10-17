@@ -15,6 +15,9 @@ class CompleteBillingAuthDto {
 
   @IsString()
   customerKey: string;
+
+  @IsEnum(SubscriptionPlan)
+  plan: SubscriptionPlan;
 }
 
 class ChangePlanDto {
@@ -64,9 +67,10 @@ export class SubscriptionController {
   @Post('subscribe')
   @UseGuards(JwtAuthGuard)
   async subscribe(@Request() req, @Body() dto: InitiateSubscriptionDto) {
-    const { customerKey } = await this.subscriptionService.initiateSubscription(req.user.id, dto.plan);
+    const { customerKey, plan } = await this.subscriptionService.generateCustomerKey(req.user.id, dto.plan);
     return {
       customerKey,
+      plan,
     };
   }
 
@@ -76,14 +80,11 @@ export class SubscriptionController {
   @Post('complete-billing-auth')
   @UseGuards(JwtAuthGuard)
   async completeBillingAuth(@Request() req, @Body() dto: CompleteBillingAuthDto) {
-    // TODO: authKey로 토스페이먼츠에서 빌링키 발급 받기
-    // 현재는 authKey를 그대로 billingKey로 사용 (임시)
-    const billingKey = dto.authKey; // 실제로는 TossPaymentsService.issueBillingKey() 호출 필요
-
     const subscription = await this.subscriptionService.completeBillingAuth(
       req.user.id,
-      billingKey,
+      dto.authKey,
       dto.customerKey,
+      dto.plan,
     );
 
     return {

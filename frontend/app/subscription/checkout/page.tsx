@@ -11,7 +11,23 @@ import { apiClient } from "@/lib/api-client"
 import { toast } from "sonner"
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk"
 
-const PLAN_INFO = {
+const PLAN_INFO: Record<string, {
+  name: string;
+  price: number;
+  scans: number;
+  features: string[];
+}> = {
+  starter: {
+    name: "Starter",
+    price: 9900,
+    scans: 5,
+    features: [
+      "월 5회 보안 스캔",
+      "전체 취약점 리포트",
+      "PDF 다운로드",
+      "AI 기반 취약점 분석",
+    ],
+  },
   pro: {
     name: "Pro",
     price: 29900,
@@ -45,7 +61,7 @@ const PLAN_INFO = {
 function SubscriptionCheckoutPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const plan = searchParams.get("plan") as "pro" | "business" | null
+  const plan = searchParams.get("plan") as "starter" | "pro" | "business" | null
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState<any>(null)
 
@@ -97,7 +113,7 @@ function SubscriptionCheckoutPageContent() {
 
     setLoading(true)
     try {
-      // Get customerKey from backend
+      // Get customerKey from backend (구독 정보는 변경하지 않음!)
       const result = await apiClient.initiateSubscription(plan)
       console.log('[SUBSCRIPTION] Received result:', result)
 
@@ -107,6 +123,9 @@ function SubscriptionCheckoutPageContent() {
         setLoading(false)
         return
       }
+
+      // Store plan in sessionStorage to pass it after billing auth
+      sessionStorage.setItem('pendingSubscriptionPlan', plan)
 
       // Load TossPayments V2 SDK
       const tossPayments = await loadTossPayments("test_ck_XZYkKL4MrjjoNwWzKWERr0zJwlEW")

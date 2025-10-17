@@ -28,6 +28,23 @@ const SUBSCRIPTION_PLANS = [
     popular: false,
   },
   {
+    id: "starter",
+    name: "Starter",
+    price: 9900,
+    period: "월",
+    scans: 5,
+    description: "소규모 프로젝트를 위한 시작 플랜",
+    features: [
+      "월 5회 보안 스캔",
+      "전체 취약점 리포트",
+      "PDF 다운로드",
+      "AI 기반 취약점 분석",
+    ],
+    icon: Sparkles,
+    color: "from-green-500 to-green-600",
+    popular: false,
+  },
+  {
     id: "pro",
     name: "Pro",
     price: 29900,

@@ -262,16 +262,16 @@ class APIClient {
   }
 
   async initiateSubscription(plan: string) {
-    return this.request('/subscription/subscribe', {
+    return this.request<{ customerKey: string; plan: string }>('/subscription/subscribe', {
       method: 'POST',
       body: JSON.stringify({ plan }),
     });
   }
 
-  async completeBillingAuth(authKey: string, customerKey: string) {
+  async completeBillingAuth(authKey: string, customerKey: string, plan: string) {
     return this.request('/subscription/complete-billing-auth', {
       method: 'POST',
-      body: JSON.stringify({ authKey, customerKey }),
+      body: JSON.stringify({ authKey, customerKey, plan }),
     });
   }
 
