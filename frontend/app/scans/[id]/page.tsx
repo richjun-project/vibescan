@@ -86,6 +86,8 @@ export default function ScanDetailPage() {
   const [paymentModalOpen, setPaymentModalOpen] = useState(false)
   const [expandedVulns, setExpandedVulns] = useState<Set<number>>(new Set())
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0)
+  const [subscription, setSubscription] = useState<any>(null)
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true)
 
   // Rotating motivational messages from homepage benefits
   const motivationalMessages = useMemo(() => [
@@ -113,6 +115,26 @@ export default function ScanDetailPage() {
       return
     }
 
+    // Fetch user's subscription info
+    const fetchSubscription = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscription/current`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setSubscription(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch subscription:', error)
+      } finally {
+        setSubscriptionLoading(false)
+      }
+    }
+
+    fetchSubscription()
     fetchScanDetail(token)
 
     // Connect to WebSocket for real-time progress
@@ -611,8 +633,11 @@ export default function ScanDetailPage() {
     )
   }
 
-  // Free preview mode - Show only summary
-  if (scan.previewMode || !scan.isPaid) {
+  // Check if user has active paid subscription
+  const hasPaidSubscription = subscription && subscription.status === 'active' && subscription.plan !== 'free'
+
+  // Free preview mode - Show only summary if no paid subscription
+  if (!hasPaidSubscription && (scan.previewMode || !scan.isPaid)) {
     return (
       <div className="min-h-screen bg-white">
         <header className="border-b border-gray-100 bg-white sticky top-0 z-50">

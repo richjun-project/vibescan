@@ -534,6 +534,8 @@ export default function DashboardPage() {
                     )}>
                       {subscriptionPlan === 'free'
                         ? 'Free Plan'
+                        : subscriptionPlan === 'starter'
+                        ? 'Starter Plan'
                         : subscriptionPlan === 'pro'
                         ? 'Pro Plan'
                         : subscriptionPlan === 'business'

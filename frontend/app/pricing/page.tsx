@@ -75,8 +75,6 @@ const SUBSCRIPTION_PLANS = [
       "PDF 다운로드",
       "AI 기반 취약점 분석",
       "실시간 취약점 모니터링",
-      "팀 멤버 관리",
-      "API 액세스",
       "전담 지원",
     ],
     icon: Building2,
@@ -101,7 +99,7 @@ export default function PricingPage() {
       setUser(JSON.parse(userData))
 
       // Fetch subscription info
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscriptions/my`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscription/current`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

@@ -206,6 +206,7 @@ export class SubscriptionService {
           subscription.currentPeriodStart = new Date();
           subscription.currentPeriodEnd = this.getNextBillingDate();
           subscription.nextBillingDate = this.getNextBillingDate();
+          subscription.usedScans = 0;
           subscription.lastBillingDate = new Date();
           subscription.setMonthlyScansLimit();
           await this.em.flush();

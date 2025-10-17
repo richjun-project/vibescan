@@ -22,7 +22,7 @@ export default function Home() {
 
     if (token) {
       // Fetch subscription info
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscriptions/my`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/subscription/current`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
