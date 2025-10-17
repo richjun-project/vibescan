@@ -800,8 +800,8 @@ export default function ScanDetailPage() {
             {/* Blurred locked items with full info */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center justify-center z-10 bg-white/80 backdrop-blur-sm rounded-2xl">
-                <div className="text-center px-8 py-10 bg-white rounded-3xl border-2 border-blue-200 shadow-xl max-w-xl">
-                  <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
+                <div className="text-center px-8 py-10 bg-white rounded-3xl border-2 border-gray-200 shadow-xl max-w-xl">
+                  <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-gray-900 flex items-center justify-center shadow-lg">
                     <Lock className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-3">
@@ -812,27 +812,27 @@ export default function ScanDetailPage() {
                   </p>
 
                   <div className="grid grid-cols-3 gap-4 mb-8">
-                    <div className="p-4 bg-green-50 border-2 border-green-200 rounded-xl">
-                      <CheckCircle2 className="w-6 h-6 text-green-600 mx-auto mb-2" />
-                      <span className="text-xs font-semibold text-green-900 block">CVE ID</span>
-                      <span className="text-xs text-green-700">CVSS 점수</span>
+                    <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-xl">
+                      <CheckCircle2 className="w-6 h-6 text-gray-700 mx-auto mb-2" />
+                      <span className="text-xs font-semibold text-gray-900 block">CVE ID</span>
+                      <span className="text-xs text-gray-600">CVSS 점수</span>
                     </div>
-                    <div className="p-4 bg-purple-50 border-2 border-purple-200 rounded-xl">
-                      <Sparkles className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-                      <span className="text-xs font-semibold text-purple-900 block">AI 분석</span>
-                      <span className="text-xs text-purple-700">상세 설명</span>
+                    <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-xl">
+                      <Sparkles className="w-6 h-6 text-gray-700 mx-auto mb-2" />
+                      <span className="text-xs font-semibold text-gray-900 block">AI 분석</span>
+                      <span className="text-xs text-gray-600">상세 설명</span>
                     </div>
-                    <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
-                      <FileText className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                      <span className="text-xs font-semibold text-blue-900 block">수정 방법</span>
-                      <span className="text-xs text-blue-700">단계별 가이드</span>
+                    <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-xl">
+                      <FileText className="w-6 h-6 text-gray-700 mx-auto mb-2" />
+                      <span className="text-xs font-semibold text-gray-900 block">수정 방법</span>
+                      <span className="text-xs text-gray-600">단계별 가이드</span>
                     </div>
                   </div>
 
                   <Button
                     onClick={() => router.push('/pricing')}
                     size="lg"
-                    className="w-full h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-full text-lg shadow-lg hover:shadow-xl transition-all"
+                    className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white font-bold rounded-full text-lg shadow-lg hover:shadow-xl transition-all"
                   >
                     <CreditCard className="w-5 h-5 mr-2" />
                     구독하고 전체 리포트 보기
