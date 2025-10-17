@@ -128,7 +128,8 @@ function SubscriptionCheckoutPageContent() {
       sessionStorage.setItem('pendingSubscriptionPlan', plan)
 
       // Load TossPayments V2 SDK
-      const tossPayments = await loadTossPayments("test_ck_XZYkKL4MrjjoNwWzKWERr0zJwlEW")
+      const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY || "test_ck_XZYkKL4MrjjoNwWzKWERr0zJwlEW"
+      const tossPayments = await loadTossPayments(clientKey)
 
       // Create payment instance with customerKey
       const payment = tossPayments.payment({
