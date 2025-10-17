@@ -115,11 +115,25 @@ export class ScanService {
     return scan;
   }
 
-  async getScans(userId: number) {
-    return this.scanRepository.find(
+  async getScans(userId: number, page: number = 1, limit: number = 10) {
+    const offset = (page - 1) * limit;
+
+    const [scans, total] = await this.scanRepository.findAndCount(
       { user: userId },
-      { orderBy: { createdAt: 'DESC' } },
+      {
+        orderBy: { createdAt: 'DESC' },
+        limit,
+        offset,
+      },
     );
+
+    return {
+      scans,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async getScanById(scanId: number, userId: number): Promise<any> {

@@ -126,8 +126,8 @@ class APIClient {
     });
   }
 
-  async getScans() {
-    return this.request('/scans', {
+  async getScans(page: number = 1, limit: number = 10) {
+    return this.request(`/scans?page=${page}&limit=${limit}`, {
       method: 'GET',
     });
   }

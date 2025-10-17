@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, UseGuards, Request, Patch, Res, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, UseGuards, Request, Patch, Res, Query, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { IsString, IsOptional, IsBoolean } from 'class-validator';
 import { Throttle } from '@nestjs/throttler';
@@ -31,8 +31,14 @@ export class ScanController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async getScans(@Request() req) {
-    return this.scanService.getScans(req.user.id);
+  async getScans(
+    @Request() req,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ) {
+    const pageNum = parseInt(page, 10) || 1;
+    const limitNum = parseInt(limit, 10) || 10;
+    return this.scanService.getScans(req.user.id, pageNum, limitNum);
   }
 
   @Get(':id')

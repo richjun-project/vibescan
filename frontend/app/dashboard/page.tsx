@@ -88,6 +88,10 @@ export default function DashboardPage() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [canceling, setCanceling] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalScans, setTotalScans] = useState(0)
+  const SCANS_PER_PAGE = 10
 
   // Calculate available scans from subscription
   const remainingScans = user?.remainingScans || 0
@@ -138,10 +142,19 @@ export default function DashboardPage() {
     }
   }
 
-  const fetchScans = async () => {
+  const fetchScans = async (page: number = 1) => {
     try {
-      const data = await apiClient.getScans() as Scan[]
-      setScans(data)
+      const data = await apiClient.getScans(page, SCANS_PER_PAGE) as {
+        scans: Scan[]
+        total: number
+        page: number
+        limit: number
+        totalPages: number
+      }
+      setScans(data.scans)
+      setTotalPages(data.totalPages)
+      setTotalScans(data.total)
+      setCurrentPage(page)
     } catch (error) {
       console.error("Error fetching scans:", error)
       toast.error("스캔 기록을 불러올 수 없습니다")
@@ -832,8 +845,8 @@ export default function DashboardPage() {
         >
           <h2 className="text-2xl font-semibold text-gray-900 mb-1">스캔 기록</h2>
           <p className="text-sm text-gray-500 mb-6">
-            {scans.length > 0
-              ? `${scans.length}개의 스캔 기록`
+            {totalScans > 0
+              ? `총 ${totalScans}개의 스캔 기록`
               : "아직 스캔 기록이 없습니다"}
           </p>
           <div>
@@ -923,6 +936,72 @@ export default function DashboardPage() {
                   </motion.div>
                 ))}
               </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <motion.div
+                className="flex items-center justify-center gap-2 mt-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fetchScans(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="rounded-full border-2 border-gray-300 hover:border-gray-500 hover:bg-gray-50 transition-all"
+                >
+                  이전
+                </Button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                  // Show first, last, current, and adjacent pages
+                  const isFirstOrLast = page === 1 || page === totalPages
+                  const isNearCurrent = Math.abs(page - currentPage) <= 1
+                  const shouldShow = isFirstOrLast || isNearCurrent
+
+                  if (!shouldShow) {
+                    // Show ellipsis
+                    if (page === currentPage - 2 || page === currentPage + 2) {
+                      return (
+                        <span key={page} className="px-2 text-gray-400">
+                          ...
+                        </span>
+                      )
+                    }
+                    return null
+                  }
+
+                  return (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => fetchScans(page)}
+                      className={cn(
+                        "rounded-full w-10 h-10 transition-all border-2",
+                        currentPage === page
+                          ? "bg-gray-900 text-white border-gray-900 hover:bg-gray-800"
+                          : "border-gray-300 hover:border-gray-500 hover:bg-gray-50"
+                      )}
+                    >
+                      {page}
+                    </Button>
+                  )
+                })}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fetchScans(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="rounded-full border-2 border-gray-300 hover:border-gray-500 hover:bg-gray-50 transition-all"
+                >
+                  다음
+                </Button>
+              </motion.div>
             )}
           </div>
         </motion.div>
