@@ -276,10 +276,10 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-1">Free</h3>
                 <div className="mb-1">
-                  <span className="text-3xl font-semibold text-gray-900">₩0</span>
-                  <span className="text-gray-500 text-sm font-medium">/월</span>
+                  <span className="text-2xl font-semibold text-gray-900">₩0</span>
+                  <span className="text-gray-500 text-xs font-medium">/월</span>
                 </div>
-                <p className="text-sm text-gray-500">개인 프로젝트용</p>
+                <p className="text-xs text-gray-500">개인 프로젝트용</p>
               </div>
 
               <ul className="space-y-2 mb-6">
@@ -312,10 +312,10 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-1">Starter</h3>
                 <div className="mb-1">
-                  <span className="text-3xl font-semibold text-gray-900">₩9,900</span>
-                  <span className="text-gray-500 text-sm font-medium">/월</span>
+                  <span className="text-2xl font-semibold text-gray-900">₩9,900</span>
+                  <span className="text-gray-500 text-xs font-medium">/월</span>
                 </div>
-                <p className="text-sm text-gray-500">소규모 프로젝트</p>
+                <p className="text-xs text-gray-500">소규모 프로젝트</p>
               </div>
 
               <ul className="space-y-2 mb-6">
@@ -354,10 +354,10 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-1">Pro</h3>
                 <div className="mb-1">
-                  <span className="text-3xl font-semibold text-gray-900">₩29,900</span>
-                  <span className="text-gray-500 text-sm font-medium">/월</span>
+                  <span className="text-2xl font-semibold text-gray-900">₩29,900</span>
+                  <span className="text-gray-500 text-xs font-medium">/월</span>
                 </div>
-                <p className="text-sm text-gray-500">개발자 & 팀</p>
+                <p className="text-xs text-gray-500">개발자 & 팀</p>
               </div>
 
               <ul className="space-y-2 mb-6">
@@ -394,10 +394,10 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-1">Business</h3>
                 <div className="mb-1">
-                  <span className="text-3xl font-semibold text-gray-900">₩99,900</span>
-                  <span className="text-gray-500 text-sm font-medium">/월</span>
+                  <span className="text-2xl font-semibold text-gray-900">₩99,900</span>
+                  <span className="text-gray-500 text-xs font-medium">/월</span>
                 </div>
-                <p className="text-sm text-gray-500">기업용</p>
+                <p className="text-xs text-gray-500">기업용</p>
               </div>
 
               <ul className="space-y-2 mb-6">

@@ -7,7 +7,7 @@
   NODE_VERSION = "20"
   NEXT_PUBLIC_API_URL = "https://vibescan.kr/api"
   NEXT_PUBLIC_BACKEND_URL = "https://vibescan.kr/api"
-  NEXT_PUBLIC_TOSS_CLIENT_KEY = "live_ck_Z1aOwX7K8mvgmPmaRp9B3yQxzvNP"
+  # NEXT_PUBLIC_TOSS_CLIENT_KEY는 Netlify 대시보드의 Environment Variables에서 설정
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
