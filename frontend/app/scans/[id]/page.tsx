@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useMemo } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -76,6 +76,7 @@ interface ScanDetail {
 
 export default function ScanDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const scanId = params.id as string
   const [scan, setScan] = useState<ScanDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -829,12 +830,12 @@ export default function ScanDetailPage() {
                   </div>
 
                   <Button
-                    onClick={() => setPaymentModalOpen(true)}
+                    onClick={() => router.push('/pricing')}
                     size="lg"
                     className="w-full h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-full text-lg shadow-lg hover:shadow-xl transition-all"
                   >
                     <CreditCard className="w-5 h-5 mr-2" />
-                    ₩9,900에 전체 리포트 보기
+                    구독하고 전체 리포트 보기
                   </Button>
                 </div>
               </div>
