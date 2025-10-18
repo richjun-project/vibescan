@@ -907,7 +907,7 @@ export default function DashboardPage() {
                               {scan.domain}
                             </h3>
                             {getStatusBadge(scan.status)}
-                            {scan.grade && getGradeBadge(scan.grade)}
+                            {scan.status !== 'failed' && scan.grade && getGradeBadge(scan.grade)}
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <span>
