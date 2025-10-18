@@ -251,13 +251,37 @@ export default function DashboardPage() {
       }, 1500)
     } catch (error: any) {
       const errorMessage = error.message || "알 수 없는 오류가 발생했습니다"
-      toast.error("스캔 생성 실패", {
-        description: errorMessage.includes("limit")
-          ? "스캔 한도를 초과했습니다. 유료 플랜을 확인해주세요."
-          : errorMessage.includes("invalid")
-          ? "도메인 형식이 올바르지 않습니다."
-          : "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-      })
+
+      // Handle specific error cases
+      if (errorMessage.includes("이미 진행 중인 스캔")) {
+        toast.error("이미 진행 중인 스캔이 있습니다", {
+          description: "현재 스캔이 완료된 후 다시 시도해주세요.",
+          action: {
+            label: "스캔 목록",
+            onClick: () => window.location.reload()
+          }
+        })
+      } else if (errorMessage.includes("limit") || errorMessage.includes("모두 사용")) {
+        toast.error("스캔 한도 초과", {
+          description: errorMessage,
+          action: {
+            label: "업그레이드",
+            onClick: () => router.push("/pricing")
+          }
+        })
+      } else if (errorMessage.includes("도메인은 스캔할 수 없습니다")) {
+        toast.error("스캔 불가", {
+          description: errorMessage,
+        })
+      } else if (errorMessage.includes("invalid") || errorMessage.includes("형식")) {
+        toast.error("잘못된 도메인", {
+          description: "도메인 형식이 올바르지 않습니다.",
+        })
+      } else {
+        toast.error("스캔 생성 실패", {
+          description: errorMessage || "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        })
+      }
     } finally {
       setCreating(false)
     }

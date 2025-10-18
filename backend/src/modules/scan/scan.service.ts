@@ -34,6 +34,17 @@ export class ScanService {
   async createScan(user: User, domain: string, repositoryUrl?: string) {
     this.logger.log(`[CREATE_SCAN] Starting scan creation for user ${user.id}, domain: ${domain}`);
 
+    // Check if user already has a running scan
+    const existingScan = await this.scanRepository.findOne({
+      user: user.id,
+      status: ScanStatus.RUNNING,
+    });
+
+    if (existingScan) {
+      this.logger.warn(`[CREATE_SCAN] User ${user.id} already has a running scan (ID: ${existingScan.id})`);
+      throw new ForbiddenException('이미 진행 중인 스캔이 있습니다. 현재 스캔이 완료된 후 다시 시도해주세요.');
+    }
+
     // Block scanning of own domain
     const normalizedDomain = domain.toLowerCase().trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
     const blockedDomains = [
