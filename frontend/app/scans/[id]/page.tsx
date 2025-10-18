@@ -43,6 +43,7 @@ interface Vulnerability {
   cveId?: string
   aiExplanation?: string
   fixGuide?: string
+  metadata?: any
 }
 
 interface ScanDetail {
