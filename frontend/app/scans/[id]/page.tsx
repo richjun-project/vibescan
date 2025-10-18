@@ -544,7 +544,7 @@ export default function ScanDetailPage() {
             </div>
 
             {/* Progress Steps */}
-            <div className="mt-8 grid grid-cols-4 gap-4">
+            <div className="mt-8 grid grid-cols-3 gap-6">
               <div className={cn(
                 "text-center transition-all",
                 progress >= 5 ? 'opacity-100' : 'opacity-40'
@@ -573,19 +573,19 @@ export default function ScanDetailPage() {
               </div>
               <div className={cn(
                 "text-center transition-all",
-                progress >= 40 ? 'opacity-100' : 'opacity-40'
+                progress >= 90 ? 'opacity-100' : 'opacity-40'
               )}>
                 <div className="relative inline-block">
-                  {progress >= 5 && progress < 40 && (
+                  {progress >= 5 && progress < 90 && (
                     <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-purple-400 animate-ring-pulse" />
                   )}
                   <div className={cn(
                     "w-10 h-10 mx-auto mb-3 rounded-full flex items-center justify-center transition-all shadow-sm",
-                    progress >= 40
+                    progress >= 90
                       ? 'bg-purple-600 scale-110'
                       : 'bg-gray-300'
                   )}>
-                    {progress >= 40 ? (
+                    {progress >= 90 ? (
                       <Check className="w-5 h-5 text-white" />
                     ) : (
                       <span className="text-xs font-bold text-white">2</span>
@@ -594,34 +594,8 @@ export default function ScanDetailPage() {
                 </div>
                 <span className={cn(
                   "text-xs font-medium block",
-                  progress >= 40 ? 'text-purple-600' : 'text-gray-400'
-                )}>기본 스캔</span>
-              </div>
-              <div className={cn(
-                "text-center transition-all",
-                progress >= 90 ? 'opacity-100' : 'opacity-40'
-              )}>
-                <div className="relative inline-block">
-                  {progress >= 40 && progress < 90 && (
-                    <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-indigo-400 animate-ring-pulse" />
-                  )}
-                  <div className={cn(
-                    "w-10 h-10 mx-auto mb-3 rounded-full flex items-center justify-center transition-all shadow-sm",
-                    progress >= 90
-                      ? 'bg-indigo-600 scale-110'
-                      : 'bg-gray-300'
-                  )}>
-                    {progress >= 90 ? (
-                      <Check className="w-5 h-5 text-white" />
-                    ) : (
-                      <span className="text-xs font-bold text-white">3</span>
-                    )}
-                  </div>
-                </div>
-                <span className={cn(
-                  "text-xs font-medium block",
-                  progress >= 90 ? 'text-indigo-600' : 'text-gray-400'
-                )}>고급 스캔</span>
+                  progress >= 90 ? 'text-purple-600' : 'text-gray-400'
+                )}>취약점 스캔</span>
               </div>
               <div className={cn(
                 "text-center transition-all",
@@ -640,7 +614,7 @@ export default function ScanDetailPage() {
                     {progress >= 100 ? (
                       <Check className="w-5 h-5 text-white" />
                     ) : (
-                      <span className="text-xs font-bold text-white">4</span>
+                      <span className="text-xs font-bold text-white">3</span>
                     )}
                   </div>
                 </div>

@@ -8,10 +8,6 @@ import { Vulnerability } from '../../entities/vulnerability.entity';
 import { Subscription } from '../../entities/subscription.entity';
 import { NucleiScannerService } from '../../services/scanners/nuclei-scanner.service';
 import { ZapScannerService } from '../../services/scanners/zap-scanner.service';
-import { SecurityHeadersScannerService } from '../../services/scanners/security-headers-scanner.service';
-import { SSLScannerService } from '../../services/scanners/ssl-scanner.service';
-import { WebReconScannerService } from '../../services/scanners/web-recon-scanner.service';
-import { PortScannerService } from '../../services/scanners/port-scanner.service';
 import { ScoreCalculatorService } from '../../services/score-calculator.service';
 import { AIService } from '../../services/ai.service';
 import { ScanGateway } from './scan.gateway';
@@ -36,10 +32,6 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
     private readonly subscriptionRepository: EntityRepository<Subscription>,
     private readonly nucleiScanner: NucleiScannerService,
     private readonly zapScanner: ZapScannerService,
-    private readonly headersScanner: SecurityHeadersScannerService,
-    private readonly sslScanner: SSLScannerService,
-    private readonly webReconScanner: WebReconScannerService,
-    private readonly portScanner: PortScannerService,
     private readonly scoreCalculator: ScoreCalculatorService,
     private readonly aiService: AIService,
     private readonly scanGateway: ScanGateway,
@@ -149,7 +141,10 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
     let scan: Scan | null = null;
 
     try {
-      scan = await this.scanRepository.findOneOrFail({ id: scanId });
+      scan = await this.scanRepository.findOneOrFail(
+        { id: scanId },
+        { populate: ['user'] }  // Load user relation for subscription check
+      );
       this.logger.log(`[PROCESS] Scan ${scanId} found in database, current status: ${scan.status}`);
 
       // Validate state transition
@@ -166,57 +161,10 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
       await job.updateProgress(0);
       this.scanGateway.sendProgress(scanId, 0, '스캔 시작', { domain });
 
-      // Run all scanners sequentially with progress updates
-      this.logger.log(`[SCANNERS_START] Starting basic scanners for scan ${scanId}`);
-      this.scanGateway.sendProgress(scanId, 5, '기본 보안 스캐너 시작 중...');
+      // Run Nuclei and ZAP scanners in parallel (0% ~ 90%)
+      this.logger.log(`[SCANNERS_START] Starting Nuclei and ZAP scans for scan ${scanId}`);
+      this.scanGateway.sendProgress(scanId, 5, '취약점 스캔 시작 중 (5-15분 소요)...');
       const startTime = Date.now();
-
-      // Headers Scanner
-      this.scanGateway.sendProgress(scanId, 10, 'HTTP 헤더 보안 검사 중...');
-      const headersResult = await this.headersScanner.scan(domain).catch(e => {
-        this.logger.error(`[SCANNER_ERROR] Headers scanner failed for scan ${scanId}: ${e.message}`);
-        return { success: false, findings: [], error: e.message };
-      });
-      this.logger.log(`[HEADERS_DONE] Headers scanner completed with ${headersResult.findings.length} findings`);
-
-      // SSL Scanner
-      this.scanGateway.sendProgress(scanId, 20, 'SSL/TLS 인증서 검증 중...');
-      const sslResult = await this.sslScanner.scan(domain).catch(e => {
-        this.logger.error(`[SCANNER_ERROR] SSL scanner failed for scan ${scanId}: ${e.message}`);
-        return { success: false, findings: [], error: e.message };
-      });
-      this.logger.log(`[SSL_DONE] SSL scanner completed with ${sslResult.findings.length} findings`);
-
-      // WebRecon Scanner
-      this.scanGateway.sendProgress(scanId, 30, '웹 기술 스택 분석 중...');
-      const webReconResult = await this.webReconScanner.scan(domain).catch(e => {
-        this.logger.error(`[SCANNER_ERROR] WebRecon scanner failed for scan ${scanId}: ${e.message}`);
-        return { success: false, findings: [], error: e.message };
-      });
-      this.logger.log(`[WEBRECON_DONE] WebRecon scanner completed with ${webReconResult.findings.length} findings`);
-
-      // Port Scanner
-      this.scanGateway.sendProgress(scanId, 35, '포트 스캔 진행 중...');
-      const portScanResult = await this.portScanner.scan(domain).catch(e => {
-        this.logger.error(`[SCANNER_ERROR] Port scanner failed for scan ${scanId}: ${e.message}`);
-        return { success: false, findings: [], error: e.message };
-      });
-      this.logger.log(`[PORTSCAN_DONE] Port scanner completed with ${portScanResult.findings.length} findings`);
-
-      this.logger.log(`[SCANNERS_DONE] Basic scanners completed in ${Date.now() - startTime}ms`);
-      this.logger.log(`[SCANNERS_RESULT] Headers: ${headersResult.findings.length} findings, SSL: ${sslResult.findings.length} findings, WebRecon: ${webReconResult.findings.length} findings, Ports: ${portScanResult.findings.length} findings`);
-
-      // Update progress: 40% - Basic scanners completed
-      await job.updateProgress(40);
-
-      // Run advanced scanners (Nuclei + ZAP) in parallel
-      this.logger.log(`[ADVANCED_SCANNERS_START] Starting Nuclei and ZAP scans for scan ${scanId}`);
-      this.scanGateway.sendProgress(
-        scanId,
-        45,
-        '고급 스캔 시작 중 (5-15분 소요)...',
-      );
-      const advancedStartTime = Date.now();
 
       let nucleiResult: { success: boolean; findings: any[]; error?: string } = {
         success: false,
@@ -230,28 +178,24 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
         error: 'Docker not available'
       };
 
-      // Run Nuclei and ZAP (baseline) in parallel
-      // ZAP uses baseline scan (passive only) - safe for production
-      this.logger.log(`[ADVANCED_SCANNERS] Running Nuclei + ZAP Baseline (passive scan)`);
-
       // Track current progress to prevent going backwards
-      let currentOverallProgress = 45;
+      let currentOverallProgress = 5;
 
-      // Nuclei progress: 45% ~ 67.5% (22.5% range)
+      // Nuclei progress: 5% ~ 47.5% (42.5% range)
       const nucleiProgressCallback = (percent: number, message?: string) => {
-        const mappedProgress = Math.round(45 + (percent * 0.225));
+        const mappedProgress = Math.round(5 + (percent * 0.425));
         if (mappedProgress > currentOverallProgress) {
           currentOverallProgress = mappedProgress;
-          this.scanGateway.sendProgress(scanId, mappedProgress, `고급 스캔 (Nuclei): ${message || `${percent}%`}`);
+          this.scanGateway.sendProgress(scanId, mappedProgress, `취약점 스캔 (Nuclei): ${message || `${percent}%`}`);
         }
       };
 
-      // ZAP progress: 67.5% ~ 90% (22.5% range)
+      // ZAP progress: 47.5% ~ 90% (42.5% range)
       const zapProgressCallback = (percent: number, message?: string) => {
-        const mappedProgress = Math.round(67.5 + (percent * 0.225));
+        const mappedProgress = Math.round(47.5 + (percent * 0.425));
         if (mappedProgress > currentOverallProgress) {
           currentOverallProgress = mappedProgress;
-          this.scanGateway.sendProgress(scanId, mappedProgress, `고급 스캔 (ZAP): ${message || `${percent}%`}`);
+          this.scanGateway.sendProgress(scanId, mappedProgress, `취약점 스캔 (ZAP): ${message || `${percent}%`}`);
         }
       };
 
@@ -278,21 +222,17 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
         zapResult.error = zapOutcome.reason?.message || 'Unknown error';
       }
 
-      this.logger.log(`[ADVANCED_SCANNERS_DONE] Advanced scanners completed in ${Date.now() - advancedStartTime}ms`);
+      this.logger.log(`[SCANNERS_DONE] Scanners completed in ${Date.now() - startTime}ms`);
 
-      // Update progress: 90% - Advanced scanners completed
+      // Update progress: 90% - Scanners completed
       await job.updateProgress(90);
-      this.scanGateway.sendProgress(scanId, 90, '고급 스캔 완료', {
+      this.scanGateway.sendProgress(scanId, 90, '취약점 스캔 완료', {
         nuclei: nucleiResult.findings.length,
         zap: zapResult.findings.length,
       }, true);
 
       // Check scanner success rate
       const scannerResults = [
-        { name: 'Headers', success: headersResult.success },
-        { name: 'SSL', success: sslResult.success },
-        { name: 'WebRecon', success: webReconResult.success },
-        { name: 'Ports', success: portScanResult.success },
         { name: 'Nuclei', success: nucleiResult.success },
         { name: 'ZAP', success: zapResult.success },
       ];
@@ -303,27 +243,21 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
 
       this.logger.log(`[SCANNER_SUCCESS_RATE] ${successCount}/${totalCount} scanners succeeded (${successRate.toFixed(1)}%)`);
 
-      // If all critical scanners failed, mark scan as failed
-      const criticalScannersSuccessful = headersResult.success || sslResult.success || webReconResult.success;
-
-      if (!criticalScannersSuccessful) {
-        this.logger.error(`[SCANNER_FAILURE] All critical scanners failed`);
-        throw new Error('All critical scanners failed. Please check scanner configuration and Docker availability.');
+      // If all scanners failed, mark scan as failed
+      if (successCount === 0) {
+        this.logger.error(`[SCANNER_FAILURE] All scanners failed`);
+        throw new Error('All scanners failed. Please check scanner configuration and Docker availability.');
       }
 
       // Warn if success rate is low but continue
-      if (successRate < 50) {
-        this.logger.warn(`[SCANNER_WARNING] Low scanner success rate: ${successRate.toFixed(1)}%`);
+      if (successRate < 100) {
+        this.logger.warn(`[SCANNER_WARNING] Some scanners failed: ${successRate.toFixed(1)}% success rate`);
       }
 
       // Collect all findings
       const rawFindings = [
         ...nucleiResult.findings,
         ...zapResult.findings,
-        ...headersResult.findings,
-        ...sslResult.findings,
-        ...webReconResult.findings,
-        ...portScanResult.findings,
       ];
       this.logger.log(`[FINDINGS] Total findings collected: ${rawFindings.length}`);
 
@@ -388,14 +322,21 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
 
       await job.updateProgress(95);
 
-      // Generate AI summary (ONLY for paid scans)
+      // Fetch user's subscription to check for paid plan
+      const subscription = await this.subscriptionRepository.findOne({
+        user: scan.user,
+      });
+
+      // Generate AI summary (ONLY for paid plan users)
       let aiSummary = '';
-      if (scan.isPaid) {
-        this.logger.log(`[AI_SUMMARY_START] Generating AI summary for paid scan ${scanId}`);
+      const hasPaidPlan = subscription && subscription.isPaidPlan();
+
+      if (hasPaidPlan) {
+        this.logger.log(`[AI_SUMMARY_START] Generating AI summary for paid user (plan: ${subscription.plan})`);
         this.scanGateway.sendProgress(scanId, 96, 'AI 요약 생성 중...', {}, true);
         try {
           aiSummary = await this.aiService.generateScanSummary(
-            vulnerabilities,  // ← Use saved vulnerabilities instead of allFindings
+            vulnerabilities,  // ← Use saved vulnerabilities
             scoreResult.totalScore,
           );
           this.logger.log(`[AI_SUMMARY_DONE] AI summary generated successfully`);
@@ -405,7 +346,7 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
         // Don't update DB here - will be saved together with final results
         this.scanGateway.sendProgress(scanId, 97, 'AI 요약 생성 완료', {}, true);
       } else {
-        this.logger.log(`[AI_SUMMARY_SKIP] Skipping AI summary for free scan ${scanId}`);
+        this.logger.log(`[AI_SUMMARY_SKIP] Skipping AI summary for free plan user (plan: ${subscription?.plan || 'none'})`);
       }
 
       // Update progress: 98%
@@ -443,10 +384,6 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
         scanners: {
           nuclei: nucleiResult.findings.length,
           zap: zapResult.findings.length,
-          headers: headersResult.findings.length,
-          ssl: sslResult.findings.length,
-          webRecon: webReconResult.findings.length,
-          ports: portScanResult.findings.length,
         },
       };
 
