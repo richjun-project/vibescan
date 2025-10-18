@@ -960,27 +960,27 @@ export default function DashboardPage() {
                           </div>
                           {scan.results?.findingsBySeverity && (
                             <div className="flex items-center gap-2 mt-2 text-xs">
-                              {scan.results.findingsBySeverity.critical > 0 && (
+                              {(scan.results.findingsBySeverity.critical ?? 0) > 0 && (
                                 <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full font-medium">
                                   Critical: {scan.results.findingsBySeverity.critical}
                                 </span>
                               )}
-                              {scan.results.findingsBySeverity.high > 0 && (
+                              {(scan.results.findingsBySeverity.high ?? 0) > 0 && (
                                 <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full font-medium">
                                   High: {scan.results.findingsBySeverity.high}
                                 </span>
                               )}
-                              {scan.results.findingsBySeverity.medium > 0 && (
+                              {(scan.results.findingsBySeverity.medium ?? 0) > 0 && (
                                 <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full font-medium">
                                   Medium: {scan.results.findingsBySeverity.medium}
                                 </span>
                               )}
-                              {scan.results.findingsBySeverity.low > 0 && (
+                              {(scan.results.findingsBySeverity.low ?? 0) > 0 && (
                                 <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
                                   Low: {scan.results.findingsBySeverity.low}
                                 </span>
                               )}
-                              {scan.results.findingsBySeverity.info > 0 && (
+                              {(scan.results.findingsBySeverity.info ?? 0) > 0 && (
                                 <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full font-medium">
                                   Info: {scan.results.findingsBySeverity.info}
                                 </span>
