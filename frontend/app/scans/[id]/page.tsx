@@ -688,7 +688,8 @@ export default function ScanDetailPage() {
   const hasPaidSubscription = subscription && subscription.status === 'active' && subscription.plan !== 'free'
 
   // Free preview mode - Show only summary if no paid subscription
-  if (!hasPaidSubscription && (scan.previewMode || !scan.isPaid)) {
+  // TEMP: Disabled for free access - change 'false &&' to enable paywall again
+  if (false && !hasPaidSubscription && (scan.previewMode || !scan.isPaid)) {
     return (
       <div className="min-h-screen bg-white">
         <header className="border-b border-gray-100 bg-white sticky top-0 z-50">
@@ -827,7 +828,7 @@ export default function ScanDetailPage() {
                     <Lock className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                    {vulnCount - 3}개 추가 취약점 잠금
+                    {Math.max(0, vulnCount - 3)}개 추가 취약점 잠금
                   </h3>
                   <p className="text-gray-600 mb-8 leading-relaxed">
                     상세한 취약점 정보, CVE ID, AI 분석 및 단계별 수정 가이드를 확인하세요

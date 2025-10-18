@@ -76,8 +76,13 @@ export class AIService {
       return acc;
     }, {} as Record<string, number>);
 
+    // Handle case when no vulnerabilities found
+    if (vulnerabilities.length === 0) {
+      return '주요 취약점:\n• 발견된 취약점이 없습니다.\n\n조치 방법:\n1. 현재 보안 상태가 우수합니다. 정기적인 보안 스캔을 유지하세요.\n2. 새로운 기능 추가 시 보안 검토를 진행하세요.';
+    }
+
     const prompt = `
-다음 보안 스캔 결과를 분석하여 구체적인 조치 방법을 알려주세요.
+다음은 실제 보안 스캔에서 발견된 취약점 목록입니다. 오직 아래 나열된 취약점만을 기반으로 분석하세요.
 
 점수: ${score}/100
 총 취약점 수: ${vulnerabilities.length}
@@ -88,34 +93,22 @@ export class AIService {
 - Low: ${severityCounts.low || 0}
 - Info: ${severityCounts.info || 0}
 
-발견된 취약점:
+실제 발견된 취약점:
 ${vulnerabilities.slice(0, 10).map((v, i) => `${i + 1}. [${v.severity}] ${v.title}${v.category ? ` (${v.category})` : ''}`).join('\n')}
 
-다음 형식으로 작성하세요 (마크다운 ** 표시 사용 금지):
+위에 나열된 취약점만을 사용하여 다음 형식으로 작성하세요:
 
 주요 취약점:
-• [구체적인 취약점 이름과 위치]
-• [구체적인 취약점 이름과 위치]
-• [구체적인 취약점 이름과 위치]
+• [위 목록에서 선택한 실제 취약점 이름]
+• [위 목록에서 선택한 실제 취약점 이름]
+• [위 목록에서 선택한 실제 취약점 이름]
 
 조치 방법:
-1. [구체적인 코드 수정 방법이나 설정 변경 방법]
-2. [구체적인 코드 수정 방법이나 설정 변경 방법]
-3. [구체적인 코드 수정 방법이나 설정 변경 방법]
+1. [위에서 언급한 취약점에 대한 구체적인 수정 방법]
+2. [위에서 언급한 취약점에 대한 구체적인 수정 방법]
+3. [위에서 언급한 취약점에 대한 구체적인 수정 방법]
 
-예시:
-주요 취약점:
-• Content-Security-Policy 헤더 누락 - 모든 페이지에서 XSS 공격에 노출
-• HSTS 헤더 미설정 - HTTPS 다운그레이드 공격 가능
-• X-Frame-Options 미설정 - 클릭재킹 공격 가능
-
-조치 방법:
-1. 웹서버 설정 파일에 "Content-Security-Policy: default-src 'self'" 헤더 추가
-2. Nginx/Apache 설정에 "Strict-Transport-Security: max-age=31536000" 헤더 추가
-3. 응답 헤더에 "X-Frame-Options: DENY" 또는 "SAMEORIGIN" 추가
-
-한국어로 작성하고, 추상적인 표현("분석", "검토", "파악") 대신 실행 가능한 구체적인 방법을 제시하세요.
-마크다운 볼드 표시(**텍스트**)는 절대 사용하지 마세요.
+중요: 위 목록에 없는 취약점은 절대 언급하지 마세요. 한국어로 작성하고, 마크다운 볼드 표시(**텍스트**)는 사용하지 마세요.
 `;
 
     try {
@@ -282,7 +275,10 @@ ${vulnerability.file ? `- 파일: ${vulnerability.file}` : ''}
     let risks = '';
     let actions = '';
 
-    if (score >= 90) {
+    if (score === 100) {
+      risks = '주요 취약점:\n• 발견된 취약점이 없습니다.';
+      actions = '조치 방법:\n1. 현재 보안 상태가 우수합니다. 정기적인 보안 스캔을 유지하세요.\n2. 새로운 기능 추가 시 보안 검토를 진행하세요.';
+    } else if (score >= 90) {
       risks = '주요 취약점:\n• 낮은 심각도의 보안 헤더 누락\n• 일부 정보성 취약점';
       actions = '조치 방법:\n1. 웹서버 보안 헤더 설정 추가 (CSP, HSTS, X-Frame-Options)\n2. 정기적인 보안 스캔 스케줄 설정 (월 1회 권장)';
     } else if (score >= 75) {
