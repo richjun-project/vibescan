@@ -85,6 +85,7 @@ export default function ScanDetailPage() {
   const [progressMessage, setProgressMessage] = useState<string>("")
   const [paymentModalOpen, setPaymentModalOpen] = useState(false)
   const [expandedVulns, setExpandedVulns] = useState<Set<number>>(new Set())
+  const [showInfoItems, setShowInfoItems] = useState(false)
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0)
   const [subscription, setSubscription] = useState<any>(null)
   const [subscriptionLoading, setSubscriptionLoading] = useState(true)
@@ -737,6 +738,10 @@ export default function ScanDetailPage() {
                 <div className="text-xs font-medium text-gray-500 mb-2">Low</div>
                 <div className="text-3xl font-bold text-blue-600">{stats.low}</div>
               </div>
+              <div className="text-center">
+                <div className="text-xs font-medium text-gray-500 mb-2">Info</div>
+                <div className="text-3xl font-bold text-gray-400">{stats.info}</div>
+              </div>
             </div>
           </div>
 
@@ -816,19 +821,22 @@ export default function ScanDetailPage() {
               </div>
             )
           ) : (
-            <div className="space-y-3">
-              {scan.vulnerabilities.map((vuln) => {
-                const isExpanded = expandedVulns.has(vuln.id)
-                return (
-                  <div
-                    key={vuln.id}
-                    className={cn(
-                      "border-2 rounded-2xl overflow-hidden transition-all",
-                      isExpanded
-                        ? "border-blue-300 shadow-md"
-                        : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                    )}
-                  >
+            <div className="space-y-6">
+              {/* Critical/High/Medium/Low Vulnerabilities */}
+              {scan.vulnerabilities.filter(v => v.severity !== 'info').length > 0 && (
+                <div className="space-y-3">
+                  {scan.vulnerabilities.filter(v => v.severity !== 'info').map((vuln) => {
+                    const isExpanded = expandedVulns.has(vuln.id)
+                    return (
+                      <div
+                        key={vuln.id}
+                        className={cn(
+                          "border-2 rounded-2xl overflow-hidden transition-all",
+                          isExpanded
+                            ? "border-blue-300 shadow-md"
+                            : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                        )}
+                      >
                     {/* Vulnerability Header - Clickable */}
                     <button
                       onClick={() => toggleVulnerability(vuln.id)}
@@ -902,8 +910,113 @@ export default function ScanDetailPage() {
                       </div>
                     )}
                   </div>
-                )
-              })}
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* Info Vulnerabilities - Collapsible Section */}
+              {scan.vulnerabilities.filter(v => v.severity === 'info').length > 0 && (
+                <div className="mt-6">
+                  <button
+                    onClick={() => setShowInfoItems(!showInfoItems)}
+                    className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-xl transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="text-sm font-semibold text-gray-700">
+                        정보성 항목
+                      </div>
+                      <span className="px-2 py-1 bg-gray-200 text-gray-600 rounded-full text-xs font-medium">
+                        {stats.info}개
+                      </span>
+                    </div>
+                    {showInfoItems ? (
+                      <ChevronUp className="w-5 h-5 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-500" />
+                    )}
+                  </button>
+
+                  {showInfoItems && (
+                    <div className="mt-3 space-y-3">
+                      {scan.vulnerabilities.filter(v => v.severity === 'info').map((vuln) => {
+                        const isExpanded = expandedVulns.has(vuln.id)
+                        return (
+                          <div
+                            key={vuln.id}
+                            className={cn(
+                              "border-2 rounded-2xl overflow-hidden transition-all",
+                              isExpanded
+                                ? "border-gray-300 shadow-md"
+                                : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                            )}
+                          >
+                            {/* Vulnerability Header - Clickable */}
+                            <button
+                              onClick={() => toggleVulnerability(vuln.id)}
+                              className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                            >
+                              <div className="flex items-center gap-4 flex-1 min-w-0">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <h3 className="text-lg font-semibold text-gray-900 truncate">
+                                      {vuln.title}
+                                    </h3>
+                                    {getSeverityBadge(vuln.severity)}
+                                  </div>
+                                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                                    <span className="px-2 py-1 bg-gray-100 rounded-md font-medium">{vuln.category}</span>
+                                    {vuln.cveId && (
+                                      <>
+                                        <span>•</span>
+                                        <span className="font-mono font-semibold text-gray-700">{vuln.cveId}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              {isExpanded ? (
+                                <ChevronUp className="w-5 h-5 text-gray-600 flex-shrink-0 ml-4" />
+                              ) : (
+                                <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0 ml-4" />
+                              )}
+                            </button>
+
+                            {/* Vulnerability Details - Expandable */}
+                            {isExpanded && (
+                              <div className="px-6 pb-6 pt-2 space-y-6 border-t-2 border-gray-100 bg-gray-50">
+                                {/* Description */}
+                                <div>
+                                  <h4 className="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-3 flex items-center gap-2">
+                                    <Info className="w-4 h-4" />
+                                    설명
+                                  </h4>
+                                  <p className="text-sm text-gray-700 leading-relaxed">
+                                    {vuln.description}
+                                  </p>
+                                </div>
+
+                                {/* Metadata */}
+                                {vuln.metadata && (
+                                  <div>
+                                    <h4 className="text-xs font-semibold text-gray-900 uppercase tracking-wide mb-3 flex items-center gap-2">
+                                      <FileText className="w-4 h-4" />
+                                      상세 정보
+                                    </h4>
+                                    <pre className="text-xs bg-white p-4 rounded-xl border border-gray-200 overflow-x-auto max-h-96 overflow-y-auto">
+                                      {JSON.stringify(vuln.metadata, null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
           </div>
