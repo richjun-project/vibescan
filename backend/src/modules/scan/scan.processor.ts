@@ -335,19 +335,13 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
         removed: rawFindings.length - allFindings.length,
       }, true);
 
-      // Update progress: 92% - Analyzing findings
+      // Update progress: 92% - Saving vulnerabilities
       await job.updateProgress(92);
-      this.scanGateway.sendProgress(scanId, 92, '보안 점수 계산 중...', {}, true);
+      this.scanGateway.sendProgress(scanId, 92, '취약점 데이터 준비 중...', {}, true);
 
-      // Calculate score
-      this.logger.log(`[SCORE_START] Calculating score for scan ${scanId}`);
-      const scoreResult = this.scoreCalculator.calculateScore(allFindings);
-      this.logger.log(`[SCORE_DONE] Score calculated: ${scoreResult.totalScore} (Grade: ${scoreResult.grade})`);
-
-      // Save vulnerabilities to database
+      // Save vulnerabilities to database FIRST (to normalize severity/category via Enum)
       this.logger.log(`[DB_SAVE_START] Saving ${allFindings.length} vulnerabilities to database`);
-      this.scanGateway.sendProgress(scanId, 93, '취약점 데이터 준비 중...', {}, true);
-      this.scanGateway.sendProgress(scanId, 94, `${allFindings.length}개 취약점 저장 중...`, {}, true);
+      this.scanGateway.sendProgress(scanId, 93, `${allFindings.length}개 취약점 저장 중...`, {}, true);
       const vulnerabilities = [];
       let aiExplanationsCount = 0;
 
@@ -356,8 +350,8 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
           scan,
           title: finding.title,
           description: finding.description,
-          severity: finding.severity,
-          category: finding.category,
+          severity: finding.severity,  // ← Enum으로 정규화됨
+          category: finding.category,  // ← Enum으로 정규화됨
           cveId: finding.cveId,
           metadata: finding.metadata || finding,
         });
@@ -371,12 +365,28 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
 
       this.logger.log(`[DB_SAVE_DONE] Saved ${vulnerabilities.length} vulnerabilities (${aiExplanationsCount} with AI explanations)`);
 
-      // Update progress: 95% - Vulnerabilities saved
-      await job.updateProgress(95);
-      this.scanGateway.sendProgress(scanId, 95, '취약점 저장 완료', {
+      // Update progress: 94% - Vulnerabilities saved
+      await job.updateProgress(94);
+      this.scanGateway.sendProgress(scanId, 94, '취약점 저장 완료', {
         total: vulnerabilities.length,
         withAI: aiExplanationsCount,
       }, true);
+
+      // Calculate score from SAVED vulnerabilities (with normalized severity/category)
+      this.logger.log(`[SCORE_START] Calculating score for scan ${scanId} from ${vulnerabilities.length} saved vulnerabilities`);
+      this.scanGateway.sendProgress(scanId, 95, '보안 점수 계산 중...', {}, true);
+
+      // Debug: Log severity distribution from saved data
+      const severityDist = vulnerabilities.reduce((acc, v) => {
+        acc[v.severity] = (acc[v.severity] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      this.logger.log(`[SCORE_DEBUG] Severity distribution from DB: ${JSON.stringify(severityDist)}`);
+
+      const scoreResult = this.scoreCalculator.calculateScore(vulnerabilities);
+      this.logger.log(`[SCORE_DONE] Score calculated: ${scoreResult.totalScore} (Grade: ${scoreResult.grade}), Penalty: ${scoreResult.penalties.severity}`);
+
+      await job.updateProgress(95);
 
       // Generate AI summary (ONLY for paid scans)
       let aiSummary = '';
@@ -385,7 +395,7 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
         this.scanGateway.sendProgress(scanId, 96, 'AI 요약 생성 중...', {}, true);
         try {
           aiSummary = await this.aiService.generateScanSummary(
-            allFindings,
+            vulnerabilities,  // ← Use saved vulnerabilities instead of allFindings
             scoreResult.totalScore,
           );
           this.logger.log(`[AI_SUMMARY_DONE] AI summary generated successfully`);
@@ -411,9 +421,9 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
       scan.progress = 100;
       scan.progressMessage = '스캔 완료!';
 
-      // Count findings by severity
-      const findingsBySeverity = allFindings.reduce((acc, f) => {
-        acc[f.severity] = (acc[f.severity] || 0) + 1;
+      // Count findings by severity from SAVED vulnerabilities
+      const findingsBySeverity = vulnerabilities.reduce((acc, v) => {
+        acc[v.severity] = (acc[v.severity] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
 
@@ -422,65 +432,27 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
         grade: scoreResult.grade,
         breakdown: scoreResult.breakdown,
         penalties: scoreResult.penalties,
-        vulnerabilitiesCount: allFindings.length,
+        vulnerabilitiesCount: vulnerabilities.length,  // ← Use saved vulnerabilities
         findingsBySeverity, // e.g., { critical: 2, high: 3, medium: 5, low: 8, info: 20 }
         aiSummary,
         recommendations: this.scoreCalculator.getScoreRecommendations(
           scoreResult.totalScore,
-          allFindings,
+          vulnerabilities,  // ← Use saved vulnerabilities
         ),
-        // Detailed findings from all scanners
-        allFindings: allFindings.map(f => ({
-          title: f.title,
-          description: f.description,
-          severity: f.severity,
-          category: f.category,
-          cveId: f.cveId,
-          matcher_name: f.matcher_name,
-          host: f.host,
-          matched_at: f.matched_at,
-        })),
+        // Detailed findings stored in vulnerability table, not here
         scanners: {
-          nuclei: {
-            success: nucleiResult.success,
-            count: nucleiResult.findings.length,
-            findings: nucleiResult.findings,  // Nuclei 상세 결과 포함
-            error: nucleiResult.error,
-          },
-          zap: {
-            success: zapResult.success,
-            count: zapResult.findings.length,
-            findings: zapResult.findings,  // ZAP 상세 결과 포함
-            error: zapResult.error,
-          },
-          headers: {
-            success: headersResult.success,
-            count: headersResult.findings.length,
-            findings: headersResult.findings, // Headers 상세 결과 포함
-          },
-          ssl: {
-            success: sslResult.success,
-            count: sslResult.findings.length,
-            findings: sslResult.findings, // SSL 상세 결과 포함
-          },
-          webRecon: {
-            success: webReconResult.success,
-            count: webReconResult.findings.length,
-            findings: webReconResult.findings, // WebRecon 상세 결과 포함
-          },
-          ports: {
-            success: portScanResult.success,
-            count: portScanResult.findings.length,
-            findings: portScanResult.findings, // Port 상세 결과 포함
-          },
+          nuclei: nucleiResult.findings.length,
+          zap: zapResult.findings.length,
+          headers: headersResult.findings.length,
+          ssl: sslResult.findings.length,
+          webRecon: webReconResult.findings.length,
+          ports: portScanResult.findings.length,
         },
       };
 
-      // Store full Nuclei JSON report if available
-      if (nucleiResult.success && (nucleiResult as any).jsonReport) {
-        scan.jsonReport = (nucleiResult as any).jsonReport;
-        this.logger.log(`[FINALIZE] Nuclei JSON report saved (${(nucleiResult as any).jsonReport.length} entries)`);
-      }
+      // DO NOT store full Nuclei JSON report - it's too large for DB
+      // Detailed findings are already stored in vulnerability table
+      this.logger.log(`[FINALIZE] Skipping jsonReport storage to reduce DB size`);
 
       // Flush ALL changes (status, score, grade, results, progress, progressMessage) at once
       this.logger.log(`[FINALIZE_FLUSH] Saving final scan results to database...`);

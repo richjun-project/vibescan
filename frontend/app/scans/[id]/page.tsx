@@ -725,7 +725,9 @@ export default function ScanDetailPage() {
             {/* Main Score Display */}
             <div>
               <div className="text-sm font-medium text-gray-500 mb-2">보안 점수</div>
-              {scan.score !== undefined ? (
+              {scan.status === 'failed' ? (
+                <div className="text-2xl text-red-600">스캔 실패</div>
+              ) : scan.score !== undefined ? (
                 <div className="flex items-baseline gap-2">
                   <span className="text-6xl font-bold text-gray-900">{scan.score}</span>
                   <span className="text-2xl text-gray-400">/100</span>
