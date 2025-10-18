@@ -17,10 +17,6 @@ import { NucleiScannerService } from '../../services/scanners/nuclei-scanner.ser
 import { ZapScannerService } from '../../services/scanners/zap-scanner.service';
 import { TrivyScannerService } from '../../services/scanners/trivy-scanner.service';
 import { GitleaksScannerService } from '../../services/scanners/gitleaks-scanner.service';
-import { SecurityHeadersScannerService } from '../../services/scanners/security-headers-scanner.service';
-import { SSLScannerService } from '../../services/scanners/ssl-scanner.service';
-import { WebReconScannerService } from '../../services/scanners/web-recon-scanner.service';
-import { PortScannerService } from '../../services/scanners/port-scanner.service';
 
 // Core services
 import { ScoreCalculatorService } from '../../services/score-calculator.service';
@@ -61,10 +57,6 @@ import { StuckJobCleanerService } from '../../services/stuck-job-cleaner.service
     ZapScannerService,
     TrivyScannerService,
     GitleaksScannerService,
-    SecurityHeadersScannerService,
-    SSLScannerService,
-    WebReconScannerService,
-    PortScannerService,
     // Core services
     ScoreCalculatorService,
     AIService,
