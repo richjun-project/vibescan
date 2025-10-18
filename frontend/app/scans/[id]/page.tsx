@@ -689,7 +689,7 @@ export default function ScanDetailPage() {
 
   // Free preview mode - Show only summary if no paid subscription
   // TEMP: Disabled for free access - change 'false &&' to enable paywall again
-  if (false && !hasPaidSubscription && (scan.previewMode || !scan.isPaid)) {
+  if (false && !hasPaidSubscription && scan && (scan.previewMode || !scan.isPaid)) {
     return (
       <div className="min-h-screen bg-white">
         <header className="border-b border-gray-100 bg-white sticky top-0 z-50">
