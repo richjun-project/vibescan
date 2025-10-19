@@ -4,10 +4,11 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Exclude static files, API routes, and Next.js internals
+  // Exclude static files, API routes, auth callbacks, and Next.js internals
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
+    pathname.startsWith('/auth/callback') ||
     pathname.startsWith('/images') ||
     pathname.startsWith('/logo.png') ||
     pathname.startsWith('/background.png') ||
@@ -37,11 +38,15 @@ export function middleware(request: NextRequest) {
   // Check Cloudflare/Netlify country header
   const country = request.headers.get('cf-ipcountry') ||
                   request.headers.get('x-vercel-ip-country') ||
+                  request.headers.get('x-country-code') ||
                   request.headers.get('cloudfront-viewer-country')
 
   // Check Accept-Language header
   const acceptLanguage = request.headers.get('accept-language') || ''
   const isKoreanPreferred = acceptLanguage.toLowerCase().includes('ko')
+
+  // Debug logging
+  console.log('[MIDDLEWARE] Country:', country, 'Accept-Language:', acceptLanguage, 'isKoreanPreferred:', isKoreanPreferred)
 
   // Determine if user is from Korea
   // Default to Korea for local development (when country is null and no clear language preference)
