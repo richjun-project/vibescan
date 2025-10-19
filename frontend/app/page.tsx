@@ -9,7 +9,6 @@ import Image from "next/image"
 import { Shield, Zap, Award, ArrowRight, CheckCircle2, Sparkles, TrendingUp, Code, Lock, Rocket, Menu } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { ArcadeEmbed } from "@/components/ArcadeEmbed"
 
 export default function Home() {
   const router = useRouter()
@@ -206,11 +205,6 @@ export default function Home() {
               12,000+ 취약점 패턴과 AI 분석으로<br className="hidden md:block" />
               프로덕션 환경을 5분 안에 보호하세요
             </p>
-
-            {/* Arcade Demo Embed */}
-            <div className="mb-12 max-w-3xl mx-auto">
-              <ArcadeEmbed />
-            </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Link href={isLoggedIn ? "/dashboard" : "/register"}>

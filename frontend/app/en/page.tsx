@@ -9,7 +9,6 @@ import Image from "next/image"
 import { Shield, Zap, Award, ArrowRight, CheckCircle2, Sparkles, TrendingUp, Code, Lock, Rocket, Menu } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { ArcadeEmbed } from "@/components/ArcadeEmbed"
 
 export default function HomeEN() {
   const router = useRouter()
@@ -206,11 +205,6 @@ export default function HomeEN() {
               Protect your production environment in 5 minutes<br className="hidden md:block" />
               with 12,000+ vulnerability patterns and AI analysis
             </p>
-
-            {/* Arcade Demo Embed */}
-            <div className="mb-12 max-w-3xl mx-auto">
-              <ArcadeEmbed />
-            </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Link href={isLoggedIn ? "/en/dashboard" : "/en/register"}>
