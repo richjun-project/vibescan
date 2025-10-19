@@ -44,7 +44,8 @@ export function middleware(request: NextRequest) {
   const isKoreanPreferred = acceptLanguage.toLowerCase().includes('ko')
 
   // Determine if user is from Korea
-  const isFromKorea = country === 'KR' || (country === null && isKoreanPreferred)
+  // Default to Korea for local development (when country is null and no clear language preference)
+  const isFromKorea = country === 'KR' || (country === null && (isKoreanPreferred || !acceptLanguage))
 
   // If user is NOT from Korea and accessing Korean pages, redirect to English
   if (!isFromKorea && !pathname.startsWith('/en')) {
@@ -54,7 +55,7 @@ export function middleware(request: NextRequest) {
   }
 
   // If user IS from Korea and accessing English pages, redirect to Korean
-  if (isFromKorea && pathname.startsWith('/en') && pathname !== '/en') {
+  if (isFromKorea && pathname.startsWith('/en')) {
     const newPath = pathname.replace(/^\/en/, '') || '/'
     const url = new URL(newPath, request.url)
     return NextResponse.redirect(url)

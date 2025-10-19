@@ -243,7 +243,7 @@ export default function DashboardPage() {
     setCreating(true)
 
     try {
-      const newScan = await apiClient.createScan(trimmedDomain)
+      const newScan = await apiClient.createScan(trimmedDomain, undefined, 'ko')
       setDomain("")
 
       toast.success("스캔 시작!", {
