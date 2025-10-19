@@ -262,15 +262,15 @@ export default function RegisterPageEN() {
 
         {/* Language Switcher */}
         <div className="text-center mt-6">
-          <Link
-            href="/register"
-            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+          <button
             onClick={() => {
               document.cookie = "user-lang-preference=ko; path=/; max-age=31536000"
+              window.location.href = "/register"
             }}
+            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
           >
             🇰🇷 한국어
-          </Link>
+          </button>
         </div>
       </div>
     </div>

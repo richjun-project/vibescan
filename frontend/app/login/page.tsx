@@ -207,15 +207,15 @@ export default function LoginPage() {
 
         {/* Language Switcher */}
         <div className="text-center mt-6">
-          <Link
-            href="/en/login"
-            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+          <button
             onClick={() => {
               document.cookie = "user-lang-preference=en; path=/; max-age=31536000"
+              window.location.href = "/en/login"
             }}
+            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
           >
             🇺🇸 English
-          </Link>
+          </button>
         </div>
       </div>
     </div>

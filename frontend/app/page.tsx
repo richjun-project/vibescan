@@ -101,15 +101,15 @@ export default function Home() {
               <Link href="/pricing" className="text-sm text-gray-900 hover:text-gray-600 transition-colors">
                 요금제
               </Link>
-              <Link
-                href="/en"
-                className="text-sm text-gray-900 hover:text-gray-600 transition-colors"
+              <button
                 onClick={() => {
                   document.cookie = "user-lang-preference=en; path=/; max-age=31536000"
+                  window.location.href = "/en"
                 }}
+                className="text-sm text-gray-900 hover:text-gray-600 transition-colors"
               >
                 🇺🇸 English
-              </Link>
+              </button>
               {isLoggedIn ? (
                 <Link href="/dashboard">
                   <Button size="sm" className="rounded-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white">
@@ -148,15 +148,15 @@ export default function Home() {
                   >
                     요금제
                   </Link>
-                  <Link
-                    href="/en"
-                    className="text-base text-gray-900 hover:text-gray-600 transition-colors py-2 px-4 hover:bg-gray-100 rounded-lg"
+                  <button
                     onClick={() => {
                       document.cookie = "user-lang-preference=en; path=/; max-age=31536000"
+                      window.location.href = "/en"
                     }}
+                    className="text-base text-gray-900 hover:text-gray-600 transition-colors py-2 px-4 hover:bg-gray-100 rounded-lg text-left"
                   >
                     🇺🇸 English
-                  </Link>
+                  </button>
                   {isLoggedIn ? (
                     <Link href="/dashboard" className="mt-2">
                       <Button className="w-full rounded-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white">
