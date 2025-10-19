@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, Req, Res } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Req, Res, Logger } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -31,6 +31,8 @@ export class RefreshTokenDto {
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
@@ -53,11 +55,31 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthCallback(@Req() req, @Res() res: Response) {
-    const result = await this.authService.oauthLogin(req.user);
+    try {
+      this.logger.log(`[OAUTH_CALLBACK] Google OAuth callback initiated for user: ${req.user?.email}`);
 
-    // Redirect to frontend with tokens
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-    res.redirect(`${frontendUrl}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`);
+      if (!req.user) {
+        this.logger.error('[OAUTH_CALLBACK] No user data received from Google');
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+        return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
+      }
+
+      const result = await this.authService.oauthLogin(req.user);
+
+      this.logger.log(`[OAUTH_CALLBACK] OAuth login successful for user: ${req.user.email}`);
+
+      // Redirect to frontend with tokens
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+      res.redirect(`${frontendUrl}/auth/callback?accessToken=${result.accessToken}&refreshToken=${result.refreshToken}`);
+    } catch (error) {
+      this.logger.error('[OAUTH_CALLBACK] OAuth callback failed:', error);
+      this.logger.error('[OAUTH_CALLBACK] User data:', JSON.stringify(req.user));
+      this.logger.error('[OAUTH_CALLBACK] Error stack:', error.stack);
+
+      // Redirect to frontend with error
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+      res.redirect(`${frontendUrl}/login?error=oauth_server_error&message=${encodeURIComponent(error.message || 'Unknown error')}`);
+    }
   }
 
   @Post('refresh')

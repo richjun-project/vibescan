@@ -20,16 +20,46 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: any,
     done: VerifyCallback,
   ): Promise<any> {
-    const { id, name, emails, photos } = profile;
+    try {
+      const { id, name, emails, photos } = profile;
 
-    const user = {
-      provider: 'google',
-      providerId: id,
-      email: emails[0].value,
-      name: `${name.givenName} ${name.familyName}`,
-      picture: photos[0].value,
-    };
+      // Safely extract email
+      const email = emails?.[0]?.value;
+      if (!email) {
+        return done(new Error('No email found in Google profile'), null);
+      }
 
-    done(null, user);
+      // Safely construct name with fallback
+      let displayName = 'User';
+      if (name) {
+        if (name.givenName && name.familyName) {
+          displayName = `${name.givenName} ${name.familyName}`.trim();
+        } else if (name.givenName) {
+          displayName = name.givenName;
+        } else if (name.familyName) {
+          displayName = name.familyName;
+        } else if (profile.displayName) {
+          displayName = profile.displayName;
+        }
+      } else if (profile.displayName) {
+        displayName = profile.displayName;
+      }
+
+      // Safely extract picture
+      const picture = photos?.[0]?.value || undefined;
+
+      const user = {
+        provider: 'google',
+        providerId: id,
+        email,
+        name: displayName,
+        picture,
+      };
+
+      done(null, user);
+    } catch (error) {
+      console.error('[GoogleStrategy] Error validating user:', error);
+      done(error, null);
+    }
   }
 }

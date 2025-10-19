@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
@@ -10,6 +10,8 @@ import { RefreshToken } from '../../entities/refresh-token.entity';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: EntityRepository<User>,
@@ -99,34 +101,77 @@ export class AuthService {
     name: string;
     picture?: string;
   }) {
-    // Try to find user by provider and providerId first
-    let user = await this.userRepository.findOne({
-      provider: profile.provider,
-      providerId: profile.providerId,
-    }, { populate: ['subscription'] });
+    try {
+      this.logger.log(`[OAUTH_LOGIN] Starting OAuth login for ${profile.email} via ${profile.provider}`);
 
-    if (!user) {
-      // Try to find by email
-      user = await this.userRepository.findOne({ email: profile.email }, { populate: ['subscription'] });
+      // Validate profile data
+      if (!profile.email || !profile.providerId) {
+        this.logger.error('[OAUTH_LOGIN] Invalid profile data:', profile);
+        throw new Error('Invalid OAuth profile: missing email or providerId');
+      }
 
-      if (user) {
-        // Link OAuth account to existing user
-        user.provider = profile.provider;
-        user.providerId = profile.providerId;
-        if (profile.picture) user.picture = profile.picture;
-        await this.em.flush();
+      // Try to find user by provider and providerId first
+      let user = await this.userRepository.findOne({
+        provider: profile.provider,
+        providerId: profile.providerId,
+      }, { populate: ['subscription'] });
+
+      if (!user) {
+        this.logger.log(`[OAUTH_LOGIN] User not found by providerId, searching by email: ${profile.email}`);
+
+        // Try to find by email
+        user = await this.userRepository.findOne({ email: profile.email }, { populate: ['subscription'] });
+
+        if (user) {
+          this.logger.log(`[OAUTH_LOGIN] Linking OAuth account to existing user: ${profile.email}`);
+
+          // Link OAuth account to existing user
+          user.provider = profile.provider;
+          user.providerId = profile.providerId;
+          if (profile.picture) user.picture = profile.picture;
+          await this.em.flush();
+        } else {
+          this.logger.log(`[OAUTH_LOGIN] Creating new user: ${profile.email}`);
+
+          // Create new user
+          user = this.userRepository.create({
+            email: profile.email,
+            name: profile.name || 'User',
+            provider: profile.provider,
+            providerId: profile.providerId,
+            picture: profile.picture,
+          });
+          await this.em.persistAndFlush(user);
+
+          this.logger.log(`[OAUTH_LOGIN] User created with ID: ${user.id}`);
+
+          // Create Free subscription for the new user
+          const now = new Date();
+          const nextBillingDate = new Date(now);
+          nextBillingDate.setDate(nextBillingDate.getDate() + 30);
+
+          const subscription = this.subscriptionRepository.create({
+            user,
+            plan: SubscriptionPlan.FREE,
+            status: SubscriptionStatus.ACTIVE,
+            monthlyScansLimit: 1,
+            usedScans: 0,
+            currentPeriodStart: now,
+            currentPeriodEnd: nextBillingDate,
+          });
+          await this.em.persistAndFlush(subscription);
+          user.subscription = subscription;
+
+          this.logger.log(`[OAUTH_LOGIN] Free subscription created for user: ${user.id}`);
+        }
       } else {
-        // Create new user
-        user = this.userRepository.create({
-          email: profile.email,
-          name: profile.name,
-          provider: profile.provider,
-          providerId: profile.providerId,
-          picture: profile.picture,
-        });
-        await this.em.persistAndFlush(user);
+        this.logger.log(`[OAUTH_LOGIN] Existing user found: ${profile.email}`);
+      }
 
-        // Create Free subscription for the new user
+      // Ensure user has subscription
+      if (!user.subscription) {
+        this.logger.warn(`[OAUTH_LOGIN] User ${user.id} has no subscription, creating one`);
+
         const now = new Date();
         const nextBillingDate = new Date(now);
         nextBillingDate.setDate(nextBillingDate.getDate() + 30);
@@ -142,29 +187,17 @@ export class AuthService {
         });
         await this.em.persistAndFlush(subscription);
         user.subscription = subscription;
+
+        this.logger.log(`[OAUTH_LOGIN] Subscription created for existing user: ${user.id}`);
       }
+
+      this.logger.log(`[OAUTH_LOGIN] OAuth login successful for user: ${user.email}`);
+      return await this.generateToken(user, user.subscription);
+    } catch (error) {
+      this.logger.error(`[OAUTH_LOGIN] OAuth login failed for ${profile.email}:`, error);
+      this.logger.error(`[OAUTH_LOGIN] Profile data:`, JSON.stringify(profile));
+      throw error;
     }
-
-    // Ensure user has subscription
-    if (!user.subscription) {
-      const now = new Date();
-      const nextBillingDate = new Date(now);
-      nextBillingDate.setDate(nextBillingDate.getDate() + 30);
-
-      const subscription = this.subscriptionRepository.create({
-        user,
-        plan: SubscriptionPlan.FREE,
-        status: SubscriptionStatus.ACTIVE,
-        monthlyScansLimit: 1,
-        usedScans: 0,
-        currentPeriodStart: now,
-        currentPeriodEnd: nextBillingDate,
-      });
-      await this.em.persistAndFlush(subscription);
-      user.subscription = subscription;
-    }
-
-    return await this.generateToken(user, user.subscription);
   }
 
   private async generateToken(user: User, subscription: Subscription) {
