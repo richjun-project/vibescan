@@ -101,6 +101,15 @@ export default function Home() {
               <Link href="/pricing" className="text-sm text-gray-900 hover:text-gray-600 transition-colors">
                 요금제
               </Link>
+              <Link
+                href="/en"
+                className="text-sm text-gray-900 hover:text-gray-600 transition-colors"
+                onClick={() => {
+                  document.cookie = "user-lang-preference=en; path=/; max-age=31536000"
+                }}
+              >
+                🇺🇸 English
+              </Link>
               {isLoggedIn ? (
                 <Link href="/dashboard">
                   <Button size="sm" className="rounded-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white">
@@ -138,6 +147,15 @@ export default function Home() {
                     className="text-base text-gray-900 hover:text-gray-600 transition-colors py-2 px-4 hover:bg-gray-100 rounded-lg"
                   >
                     요금제
+                  </Link>
+                  <Link
+                    href="/en"
+                    className="text-base text-gray-900 hover:text-gray-600 transition-colors py-2 px-4 hover:bg-gray-100 rounded-lg"
+                    onClick={() => {
+                      document.cookie = "user-lang-preference=en; path=/; max-age=31536000"
+                    }}
+                  >
+                    🇺🇸 English
                   </Link>
                   {isLoggedIn ? (
                     <Link href="/dashboard" className="mt-2">

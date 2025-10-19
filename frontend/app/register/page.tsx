@@ -259,6 +259,19 @@ export default function RegisterPage() {
             <span>✓ 공개 랭킹</span>
           </div>
         </div>
+
+        {/* Language Switcher */}
+        <div className="text-center mt-6">
+          <Link
+            href="/en/register"
+            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+            onClick={() => {
+              document.cookie = "user-lang-preference=en; path=/; max-age=31536000"
+            }}
+          >
+            🇺🇸 English
+          </Link>
+        </div>
       </div>
     </div>
   )
