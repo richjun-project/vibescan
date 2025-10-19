@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { analytics } from '@/lib/firebase';
 import { logEvent } from 'firebase/analytics';
 
-export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
+function AnalyticsTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -14,11 +14,22 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
       // Log page views
       logEvent(analytics, 'page_view', {
         page_path: pathname,
-        page_search: searchParams.toString(),
-        page_title: document.title,
+        page_search: searchParams?.toString() || '',
+        page_title: typeof document !== 'undefined' ? document.title : '',
       });
     }
   }, [pathname, searchParams]);
 
-  return <>{children}</>;
+  return null;
+}
+
+export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <AnalyticsTracker />
+      </Suspense>
+      {children}
+    </>
+  );
 }
