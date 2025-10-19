@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Toaster } from 'sonner'
+import { AnalyticsProvider } from '@/components/analytics-provider'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://vibescan.co.kr'),
@@ -56,7 +57,9 @@ export default function RootLayout({
         <script src="https://js.tosspayments.com/v2/standard" async></script>
       </head>
       <body>
-        {children}
+        <AnalyticsProvider>
+          {children}
+        </AnalyticsProvider>
         <Toaster position="top-center" richColors />
       </body>
     </html>
