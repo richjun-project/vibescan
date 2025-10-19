@@ -190,13 +190,12 @@
         },
         "picture": {
           "name": "picture",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "text"
         },
         "role": {
           "name": "role",
@@ -625,6 +624,17 @@
           "nullable": false,
           "default": "false",
           "mappedType": "boolean"
+        },
+        "language": {
+          "name": "language",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "default": "'ko'",
+          "mappedType": "string"
         },
         "created_at": {
           "name": "created_at",

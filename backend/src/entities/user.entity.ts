@@ -27,8 +27,8 @@ export class User {
   @Property({ nullable: true })
   providerId?: string; // OAuth provider ID
 
-  @Property({ nullable: true })
-  picture?: string; // Profile picture URL
+  @Property({ nullable: true, columnType: 'text' })
+  picture?: string; // Profile picture URL (TEXT type to support long Google URLs)
 
   @Enum(() => UserRole)
   role: UserRole = UserRole.USER;
