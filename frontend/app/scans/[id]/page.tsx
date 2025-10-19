@@ -679,12 +679,23 @@ export default function ScanDetailPage() {
                 VibeScan
               </h1>
             </Link>
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm" className="rounded-full text-gray-600 hover:text-gray-900">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                돌아가기
-              </Button>
-            </Link>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => {
+                  document.cookie = "user-lang-preference=en; path=/; max-age=31536000"
+                  window.location.href = `/en/scans/${params.id}`
+                }}
+                className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                🇺🇸 English
+              </button>
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm" className="rounded-full text-gray-600 hover:text-gray-900">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  돌아가기
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>

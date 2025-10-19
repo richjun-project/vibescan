@@ -524,6 +524,15 @@ export default function DashboardPageEN() {
                 <p className="font-medium text-gray-900">{user?.name}</p>
                 <p className="text-gray-500 text-xs">{user?.email}</p>
               </div>
+              <button
+                onClick={() => {
+                  document.cookie = "user-lang-preference=ko; path=/; max-age=31536000"
+                  window.location.href = "/dashboard"
+                }}
+                className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                🇰🇷 한국어
+              </button>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="rounded-full text-gray-600 hover:text-gray-900">
                 Logout
               </Button>

@@ -189,6 +189,15 @@ export default function PricingPageEN() {
               </h1>
             </Link>
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => {
+                  document.cookie = "user-lang-preference=ko; path=/; max-age=31536000"
+                  window.location.href = "/pricing"
+                }}
+                className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                🇰🇷 한국어
+              </button>
               {isLoggedIn ? (
                 <>
                   <Link href="/en/dashboard">
