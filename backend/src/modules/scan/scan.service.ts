@@ -42,7 +42,10 @@ export class ScanService {
 
     if (existingScan) {
       this.logger.warn(`[CREATE_SCAN] User ${user.id} already has a running scan (ID: ${existingScan.id})`);
-      throw new ForbiddenException('이미 진행 중인 스캔이 있습니다. 현재 스캔이 완료된 후 다시 시도해주세요.');
+      const message = language === 'ko'
+        ? '이미 진행 중인 스캔이 있습니다. 현재 스캔이 완료된 후 다시 시도해주세요.'
+        : 'You already have a scan in progress. Please wait for the current scan to complete.';
+      throw new ForbiddenException(message);
     }
 
     // Block scanning of own domain
@@ -56,7 +59,10 @@ export class ScanService {
 
     if (blockedDomains.some(blocked => normalizedDomain.includes(blocked))) {
       this.logger.warn(`[CREATE_SCAN] Blocked scan attempt for restricted domain: ${domain}`);
-      throw new ForbiddenException('이 도메인은 스캔할 수 없습니다.');
+      const message = language === 'ko'
+        ? '이 도메인은 스캔할 수 없습니다.'
+        : 'This domain cannot be scanned.';
+      throw new ForbiddenException(message);
     }
 
     // Get or create subscription
@@ -81,10 +87,16 @@ export class ScanService {
     if (!subscription.canScan()) {
       if (subscription.plan === SubscriptionPlan.FREE) {
         this.logger.warn(`[CREATE_SCAN] User ${user.id} has no free scans remaining`);
-        throw new ForbiddenException('무료 스캔을 모두 사용했습니다. Pro 플랜으로 업그레이드하세요.');
+        const message = language === 'ko'
+          ? '무료 스캔을 모두 사용했습니다. Pro 플랜으로 업그레이드하세요.'
+          : 'You have used all your free scans. Please upgrade to Pro plan.';
+        throw new ForbiddenException(message);
       } else {
         this.logger.warn(`[CREATE_SCAN] User ${user.id} has no scans remaining (${subscription.usedScans}/${subscription.monthlyScansLimit})`);
-        throw new ForbiddenException(`이번 달 스캔을 모두 사용했습니다. (${subscription.usedScans}/${subscription.monthlyScansLimit}회)`);
+        const message = language === 'ko'
+          ? `이번 달 스캔을 모두 사용했습니다. (${subscription.usedScans}/${subscription.monthlyScansLimit}회)`
+          : `You have used all your scans for this month. (${subscription.usedScans}/${subscription.monthlyScansLimit} scans)`;
+        throw new ForbiddenException(message);
       }
     }
 
@@ -190,7 +202,10 @@ export class ScanService {
     );
 
     if (scan.status !== ScanStatus.COMPLETED) {
-      throw new ForbiddenException('Scan is not completed yet');
+      const message = scan.language === 'en'
+        ? 'Scan is not completed yet'
+        : '스캔이 아직 완료되지 않았습니다';
+      throw new ForbiddenException(message);
     }
 
     // Get vulnerabilities
@@ -244,7 +259,10 @@ export class ScanService {
       .find((v) => v.title.toLowerCase().includes(vulnerabilityName.toLowerCase()));
 
     if (!vulnerability) {
-      throw new ForbiddenException('Vulnerability not found');
+      const message = scan.language === 'en'
+        ? 'Vulnerability not found'
+        : '취약점을 찾을 수 없습니다';
+      throw new ForbiddenException(message);
     }
 
     // Generate fix guide
@@ -281,13 +299,19 @@ export class ScanService {
     // Check if scan is already paid
     if (scan.isPaid) {
       this.logger.warn(`[UPGRADE_SCAN] Scan ${scanId} is already paid`);
-      throw new ForbiddenException('This scan is already a paid scan');
+      const message = scan.language === 'en'
+        ? 'This scan is already a paid scan'
+        : '이 스캔은 이미 유료 스캔입니다';
+      throw new ForbiddenException(message);
     }
 
     // Check if scan is completed
     if (scan.status !== ScanStatus.COMPLETED) {
       this.logger.warn(`[UPGRADE_SCAN] Scan ${scanId} is not completed yet`);
-      throw new ForbiddenException('Can only upgrade completed scans');
+      const message = scan.language === 'en'
+        ? 'Can only upgrade completed scans'
+        : '완료된 스캔만 업그레이드할 수 있습니다';
+      throw new ForbiddenException(message);
     }
 
     // Update scan to paid
