@@ -31,8 +31,8 @@ export class ScanService {
     private readonly em: EntityManager,
   ) {}
 
-  async createScan(user: User, domain: string, repositoryUrl?: string) {
-    this.logger.log(`[CREATE_SCAN] Starting scan creation for user ${user.id}, domain: ${domain}`);
+  async createScan(user: User, domain: string, repositoryUrl?: string, language: 'ko' | 'en' = 'ko') {
+    this.logger.log(`[CREATE_SCAN] Starting scan creation for user ${user.id}, domain: ${domain}, language: ${language}`);
 
     // Check if user already has a running scan
     const existingScan = await this.scanRepository.findOne({
@@ -99,6 +99,7 @@ export class ScanService {
       status: ScanStatus.PENDING,
       shareToken: crypto.randomBytes(16).toString('hex'),
       isPaid,
+      language,
     });
 
     await this.em.persistAndFlush(scan);
@@ -109,6 +110,7 @@ export class ScanService {
       scanId: scan.id,
       domain,
       repositoryUrl,
+      language,
     });
 
     this.logger.log(`[QUEUE_ADD] Job ${job.id} added to queue for scan ${scan.id}`);

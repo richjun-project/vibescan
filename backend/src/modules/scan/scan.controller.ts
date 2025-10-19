@@ -13,6 +13,10 @@ class CreateScanDto {
   @IsOptional()
   @IsString()
   repositoryUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  language?: 'ko' | 'en';
 }
 
 @Controller('scans')
@@ -26,7 +30,7 @@ export class ScanController {
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests per minute
   async createScan(@Request() req, @Body() dto: CreateScanDto) {
-    return this.scanService.createScan(req.user, dto.domain, dto.repositoryUrl);
+    return this.scanService.createScan(req.user, dto.domain, dto.repositoryUrl, dto.language || 'ko');
   }
 
   @Get()

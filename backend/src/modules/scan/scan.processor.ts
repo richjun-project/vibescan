@@ -135,8 +135,8 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
   }
 
   async process(job: Job): Promise<any> {
-    const { scanId, domain, repositoryUrl } = job.data;
-    this.logger.log(`[PROCESS_START] Job ${job.id} - Processing scan ${scanId} for domain: ${domain}`);
+    const { scanId, domain, repositoryUrl, language } = job.data;
+    this.logger.log(`[PROCESS_START] Job ${job.id} - Processing scan ${scanId} for domain: ${domain}, language: ${language || 'ko'}`);
 
     let scan: Scan | null = null;
 
@@ -332,12 +332,13 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
       const hasPaidPlan = subscription && subscription.isPaidPlan();
 
       if (hasPaidPlan) {
-        this.logger.log(`[AI_SUMMARY_START] Generating AI summary for paid user (plan: ${subscription.plan})`);
+        this.logger.log(`[AI_SUMMARY_START] Generating AI summary for paid user (plan: ${subscription.plan}), language: ${language || scan.language || 'ko'}`);
         this.scanGateway.sendProgress(scanId, 96, 'AI 요약 생성 중...', {}, true);
         try {
           aiSummary = await this.aiService.generateScanSummary(
             vulnerabilities,  // ← Use saved vulnerabilities
             scoreResult.totalScore,
+            language || scan.language || 'ko',
           );
           this.logger.log(`[AI_SUMMARY_DONE] AI summary generated successfully`);
         } catch (e) {
