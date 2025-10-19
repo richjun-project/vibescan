@@ -70,12 +70,13 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
           this.logger.log(`[RECOVERY] Processing scan ${scan.id} (was at ${scan.progress}%)`);
 
           // Mark scan as FAILED
+          const scanLang = scan.language || 'ko';
           scan.status = ScanStatus.FAILED;
           scan.progress = 0;
-          scan.progressMessage = '서버 중단으로 인한 스캔 실패';
+          scan.progressMessage = this.getProgressMessage('server_interrupted', scanLang);
           scan.results = {
             error: 'Server interrupted',
-            reason: '스캔 실행 중 서버가 중단되었습니다',
+            reason: scanLang === 'ko' ? '스캔 실행 중 서버가 중단되었습니다' : 'Server was interrupted during scan execution',
             recoveredAt: new Date().toISOString(),
           };
 
@@ -134,9 +135,82 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
     }
   }
 
+  // Translation helper for progress messages
+  private getProgressMessage(key: string, language: 'ko' | 'en' = 'ko', params?: any): string {
+    const messages: Record<string, Record<string, string>> = {
+      'scan_start': {
+        ko: '스캔 시작',
+        en: 'Scan started'
+      },
+      'scan_starting': {
+        ko: '취약점 스캔 시작 중 (5-15분 소요)...',
+        en: 'Starting vulnerability scan (5-15 min)...'
+      },
+      'scan_nuclei': {
+        ko: `취약점 스캔 (Nuclei): ${params?.message || `${params?.percent}%`}`,
+        en: `Vulnerability scan (Nuclei): ${params?.message || `${params?.percent}%`}`
+      },
+      'scan_zap': {
+        ko: `취약점 스캔 (ZAP): ${params?.message || `${params?.percent}%`}`,
+        en: `Vulnerability scan (ZAP): ${params?.message || `${params?.percent}%`}`
+      },
+      'scan_complete': {
+        ko: '취약점 스캔 완료',
+        en: 'Vulnerability scan completed'
+      },
+      'deduplicating': {
+        ko: '취약점 중복 제거 중...',
+        en: 'Removing duplicate vulnerabilities...'
+      },
+      'preparing_data': {
+        ko: '취약점 데이터 준비 중...',
+        en: 'Preparing vulnerability data...'
+      },
+      'saving_vulns': {
+        ko: `${params?.count || 0}개 취약점 저장 중...`,
+        en: `Saving ${params?.count || 0} vulnerabilities...`
+      },
+      'save_complete': {
+        ko: '취약점 저장 완료',
+        en: 'Vulnerabilities saved'
+      },
+      'calculating_score': {
+        ko: '보안 점수 계산 중...',
+        en: 'Calculating security score...'
+      },
+      'generating_ai': {
+        ko: 'AI 요약 생성 중...',
+        en: 'Generating AI summary...'
+      },
+      'ai_complete': {
+        ko: 'AI 요약 생성 완료',
+        en: 'AI summary completed'
+      },
+      'saving_results': {
+        ko: '최종 결과 저장 중...',
+        en: 'Saving final results...'
+      },
+      'completed': {
+        ko: '스캔 완료!',
+        en: 'Scan completed!'
+      },
+      'server_interrupted': {
+        ko: '서버 중단으로 인한 스캔 실패',
+        en: 'Scan failed due to server interruption'
+      },
+      'scan_failed': {
+        ko: `스캔 실패: ${params?.error || '알 수 없는 오류'}`,
+        en: `Scan failed: ${params?.error || 'Unknown error'}`
+      }
+    };
+
+    return messages[key]?.[language] || messages[key]?.['ko'] || key;
+  }
+
   async process(job: Job): Promise<any> {
     const { scanId, domain, repositoryUrl, language } = job.data;
-    this.logger.log(`[PROCESS_START] Job ${job.id} - Processing scan ${scanId} for domain: ${domain}, language: ${language || 'ko'}`);
+    const lang = language || 'ko';
+    this.logger.log(`[PROCESS_START] Job ${job.id} - Processing scan ${scanId} for domain: ${domain}, language: ${lang}`);
 
     let scan: Scan | null = null;
 
@@ -159,11 +233,11 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
 
       // Update progress: 0% - Started
       await job.updateProgress(0);
-      this.scanGateway.sendProgress(scanId, 0, '스캔 시작', { domain });
+      this.scanGateway.sendProgress(scanId, 0, this.getProgressMessage('scan_start', lang), { domain });
 
       // Run Nuclei and ZAP scanners in parallel (0% ~ 90%)
       this.logger.log(`[SCANNERS_START] Starting Nuclei and ZAP scans for scan ${scanId}`);
-      this.scanGateway.sendProgress(scanId, 5, '취약점 스캔 시작 중 (5-15분 소요)...');
+      this.scanGateway.sendProgress(scanId, 5, this.getProgressMessage('scan_starting', lang));
       const startTime = Date.now();
 
       let nucleiResult: { success: boolean; findings: any[]; error?: string } = {
@@ -186,7 +260,7 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
         const mappedProgress = Math.round(5 + (percent * 0.425));
         if (mappedProgress > currentOverallProgress) {
           currentOverallProgress = mappedProgress;
-          this.scanGateway.sendProgress(scanId, mappedProgress, `취약점 스캔 (Nuclei): ${message || `${percent}%`}`);
+          this.scanGateway.sendProgress(scanId, mappedProgress, this.getProgressMessage('scan_nuclei', lang, { percent, message }));
         }
       };
 
@@ -195,7 +269,7 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
         const mappedProgress = Math.round(47.5 + (percent * 0.425));
         if (mappedProgress > currentOverallProgress) {
           currentOverallProgress = mappedProgress;
-          this.scanGateway.sendProgress(scanId, mappedProgress, `취약점 스캔 (ZAP): ${message || `${percent}%`}`);
+          this.scanGateway.sendProgress(scanId, mappedProgress, this.getProgressMessage('scan_zap', lang, { percent, message }));
         }
       };
 
@@ -226,7 +300,7 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
 
       // Update progress: 90% - Scanners completed
       await job.updateProgress(90);
-      this.scanGateway.sendProgress(scanId, 90, '취약점 스캔 완료', {
+      this.scanGateway.sendProgress(scanId, 90, this.getProgressMessage('scan_complete', lang), {
         nuclei: nucleiResult.findings.length,
         zap: zapResult.findings.length,
       }, true);
@@ -263,7 +337,7 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
 
       // Apply deduplication
       const allFindings = this.deduplicateFindings(rawFindings);
-      this.scanGateway.sendProgress(scanId, 90, '취약점 중복 제거 중...', {
+      this.scanGateway.sendProgress(scanId, 90, this.getProgressMessage('deduplicating', lang), {
         before: rawFindings.length,
         after: allFindings.length,
         removed: rawFindings.length - allFindings.length,
@@ -271,11 +345,11 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
 
       // Update progress: 92% - Saving vulnerabilities
       await job.updateProgress(92);
-      this.scanGateway.sendProgress(scanId, 92, '취약점 데이터 준비 중...', {}, true);
+      this.scanGateway.sendProgress(scanId, 92, this.getProgressMessage('preparing_data', lang), {}, true);
 
       // Save vulnerabilities to database FIRST (to normalize severity/category via Enum)
       this.logger.log(`[DB_SAVE_START] Saving ${allFindings.length} vulnerabilities to database`);
-      this.scanGateway.sendProgress(scanId, 93, `${allFindings.length}개 취약점 저장 중...`, {}, true);
+      this.scanGateway.sendProgress(scanId, 93, this.getProgressMessage('saving_vulns', lang, { count: allFindings.length }), {}, true);
       const vulnerabilities = [];
       let aiExplanationsCount = 0;
 
@@ -301,14 +375,14 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
 
       // Update progress: 94% - Vulnerabilities saved
       await job.updateProgress(94);
-      this.scanGateway.sendProgress(scanId, 94, '취약점 저장 완료', {
+      this.scanGateway.sendProgress(scanId, 94, this.getProgressMessage('save_complete', lang), {
         total: vulnerabilities.length,
         withAI: aiExplanationsCount,
       }, true);
 
       // Calculate score from SAVED vulnerabilities (with normalized severity/category)
       this.logger.log(`[SCORE_START] Calculating score for scan ${scanId} from ${vulnerabilities.length} saved vulnerabilities`);
-      this.scanGateway.sendProgress(scanId, 95, '보안 점수 계산 중...', {}, true);
+      this.scanGateway.sendProgress(scanId, 95, this.getProgressMessage('calculating_score', lang), {}, true);
 
       // Debug: Log severity distribution from saved data
       const severityDist = vulnerabilities.reduce((acc, v) => {
@@ -332,27 +406,27 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
       const hasPaidPlan = subscription && subscription.isPaidPlan();
 
       if (hasPaidPlan) {
-        this.logger.log(`[AI_SUMMARY_START] Generating AI summary for paid user (plan: ${subscription.plan}), language: ${language || scan.language || 'ko'}`);
-        this.scanGateway.sendProgress(scanId, 96, 'AI 요약 생성 중...', {}, true);
+        this.logger.log(`[AI_SUMMARY_START] Generating AI summary for paid user (plan: ${subscription.plan}), language: ${lang}`);
+        this.scanGateway.sendProgress(scanId, 96, this.getProgressMessage('generating_ai', lang), {}, true);
         try {
           aiSummary = await this.aiService.generateScanSummary(
             vulnerabilities,  // ← Use saved vulnerabilities
             scoreResult.totalScore,
-            language || scan.language || 'ko',
+            lang,
           );
           this.logger.log(`[AI_SUMMARY_DONE] AI summary generated successfully`);
         } catch (e) {
           this.logger.error(`[AI_SUMMARY_ERROR] Failed to generate AI summary: ${e.message}`);
         }
         // Don't update DB here - will be saved together with final results
-        this.scanGateway.sendProgress(scanId, 97, 'AI 요약 생성 완료', {}, true);
+        this.scanGateway.sendProgress(scanId, 97, this.getProgressMessage('ai_complete', lang), {}, true);
       } else {
         this.logger.log(`[AI_SUMMARY_SKIP] Skipping AI summary for free plan user (plan: ${subscription?.plan || 'none'})`);
       }
 
       // Update progress: 98%
       await job.updateProgress(98);
-      this.scanGateway.sendProgress(scanId, 98, '최종 결과 저장 중...', {}, true);
+      this.scanGateway.sendProgress(scanId, 98, this.getProgressMessage('saving_results', lang), {}, true);
 
       // Update scan with results
       this.logger.log(`[FINALIZE_START] Updating scan ${scanId} with final results`);
@@ -361,7 +435,7 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
       scan.grade = scoreResult.grade;
       scan.completedAt = new Date();
       scan.progress = 100;
-      scan.progressMessage = '스캔 완료!';
+      scan.progressMessage = this.getProgressMessage('completed', lang);
 
       // Count findings by severity from SAVED vulnerabilities
       const findingsBySeverity = vulnerabilities.reduce((acc, v) => {
@@ -400,7 +474,7 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
       // Update progress: 100% - Completed
       await job.updateProgress(100);
       // Send WebSocket progress update without DB update (already saved above)
-      this.scanGateway.sendProgress(scanId, 100, '스캔 완료!', {
+      this.scanGateway.sendProgress(scanId, 100, this.getProgressMessage('completed', lang), {
         score: scoreResult.totalScore,
         grade: scoreResult.grade,
         vulnerabilities: vulnerabilities.length,
@@ -436,6 +510,7 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
         }
 
         if (scan) {
+          const scanLang = scan.language || 'ko';
           scan.status = ScanStatus.FAILED;
           scan.results = {
             error: error.message,
@@ -443,7 +518,7 @@ export class ScanProcessor extends WorkerHost implements OnModuleInit {
             jobId: job.id.toString(),
           };
           scan.progress = 0;
-          scan.progressMessage = `스캔 실패: ${error.message}`;
+          scan.progressMessage = this.getProgressMessage('scan_failed', scanLang, { error: error.message });
 
           // Retry DB update on failure
           await this.persistWithRetry(scan, 3);
