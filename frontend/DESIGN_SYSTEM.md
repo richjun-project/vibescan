@@ -7,6 +7,7 @@
 - **Blue Accent**: Primary color inspired by SF Blue
 - **Clear Hierarchy**: Typography-driven structure
 
+
 ## Color Palette
 
 ### Primary Colors
