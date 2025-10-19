@@ -8,6 +8,8 @@ import Image from "next/image"
 import { Check, ArrowRight, Sparkles, Shield, Zap, Building2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { BreadcrumbSchema } from '@/app/schema'
+import { PricingSchema } from '@/components/pricing-schema'
 
 const SUBSCRIPTION_PLANS = [
   {
@@ -172,6 +174,13 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      <BreadcrumbSchema
+        items={[
+          { name: '홈', url: 'https://vibescan.co.kr' },
+          { name: '요금제', url: 'https://vibescan.co.kr/pricing' }
+        ]}
+      />
+      <PricingSchema plans={SUBSCRIPTION_PLANS} language="ko" />
       {/* Header */}
       <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
@@ -179,9 +188,10 @@ export default function PricingPage() {
             <Link href="/" className="flex items-center gap-2">
               <Image
                 src="/logo.png"
-                alt="VibeScan 로고"
+                alt="VibeScan - AI 기반 웹 보안 취약점 스캔 서비스 로고"
                 width={32}
                 height={32}
+                priority
                 className="w-8 h-8"
               />
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">

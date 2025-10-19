@@ -88,10 +88,11 @@ export default function Home() {
             <Link href="/" className="flex items-center gap-2">
               <Image
                 src="/logo.png"
-                alt="VibeScan 로고"
+                alt="VibeScan - AI 기반 웹 보안 취약점 스캔 서비스 로고"
                 width={32}
                 height={32}
                 className="w-8 h-8"
+                priority
               />
               <span className="text-xl font-semibold text-gray-900">VibeScan</span>
             </Link>

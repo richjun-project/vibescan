@@ -10,4 +10,4 @@ Disallow: /api/
 Disallow: /payment/
 
 # Sitemap location
-Sitemap: https://vibescan.com/sitemap.xml
+Sitemap: https://vibescan.co.kr/sitemap.xml

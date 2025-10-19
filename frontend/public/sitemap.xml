@@ -3,53 +3,59 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <!-- Korean Landing Page -->
   <url>
-    <loc>https://vibescan.com/</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://vibescan.com/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://vibescan.com/en"/>
-    <lastmod>2025-01-13</lastmod>
+    <loc>https://vibescan.co.kr/</loc>
+    <xhtml:link rel="alternate" hreflang="ko-KR" href="https://vibescan.co.kr/"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://vibescan.co.kr/en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vibescan.co.kr/"/>
+    <lastmod>2025-10-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <!-- English Landing Page -->
   <url>
-    <loc>https://vibescan.com/en</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://vibescan.com/en"/>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://vibescan.com/"/>
-    <lastmod>2025-01-13</lastmod>
+    <loc>https://vibescan.co.kr/en</loc>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://vibescan.co.kr/en"/>
+    <xhtml:link rel="alternate" hreflang="ko-KR" href="https://vibescan.co.kr/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vibescan.co.kr/"/>
+    <lastmod>2025-10-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- Pricing Page -->
+  <!-- Korean Pricing Page -->
   <url>
-    <loc>https://vibescan.com/pricing</loc>
-    <lastmod>2025-01-13</lastmod>
+    <loc>https://vibescan.co.kr/pricing</loc>
+    <xhtml:link rel="alternate" hreflang="ko-KR" href="https://vibescan.co.kr/pricing"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://vibescan.co.kr/en/pricing"/>
+    <lastmod>2025-10-20</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- English Pricing Page -->
+  <url>
+    <loc>https://vibescan.co.kr/en/pricing</loc>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://vibescan.co.kr/en/pricing"/>
+    <xhtml:link rel="alternate" hreflang="ko-KR" href="https://vibescan.co.kr/pricing"/>
+    <lastmod>2025-10-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
   </url>
 
   <!-- Login Page -->
   <url>
-    <loc>https://vibescan.com/login</loc>
-    <lastmod>2025-01-13</lastmod>
+    <loc>https://vibescan.co.kr/login</loc>
+    <lastmod>2025-10-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <!-- Register Page -->
   <url>
-    <loc>https://vibescan.com/register</loc>
-    <lastmod>2025-01-13</lastmod>
+    <loc>https://vibescan.co.kr/register</loc>
+    <lastmod>2025-10-20</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <!-- Dashboard (requires login) -->
-  <url>
-    <loc>https://vibescan.com/dashboard</loc>
-    <lastmod>2025-01-13</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
+    <priority>0.8</priority>
   </url>
 </urlset>
