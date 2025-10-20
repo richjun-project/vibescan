@@ -102,11 +102,11 @@ export function OAuthButton({ provider, lang = "ko", className, children }: OAut
       <AlertDialog open={showWarning} onOpenChange={setShowWarning}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
+            <AlertDialogTitle className="flex items-center gap-2 text-gray-900">
               <AlertCircle className="h-5 w-5 text-red-600" />
               {warningContent.title}
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-base leading-relaxed">
+            <AlertDialogDescription className="text-base leading-relaxed text-gray-700">
               {warningContent.message}
             </AlertDialogDescription>
           </AlertDialogHeader>
