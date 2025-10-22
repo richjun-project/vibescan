@@ -47,7 +47,7 @@ export class NucleiScannerService extends BaseScannerService {
           // Note: NOT using -omit-raw to include full request/response pairs in output
           // Note: Removed -tags filter to allow all templates (not just owasp,cve,exposure)
         ],
-        900000, // 15 minutes timeout for nuclei scan (4000+ templates need time)
+        1800000, // 30 minutes timeout for nuclei scan (4000+ templates need time)
         'NUCLEI',  // Log prefix
         progressCallback  // Pass progress callback
       );
