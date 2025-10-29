@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     siteName: 'VibeScan',
     images: [
       {
-        url: '/logo.png',
+        url: '/logo2.png',
         width: 1200,
         height: 630,
         alt: 'VibeScan - 웹 보안 점검 서비스',
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     description: 'VibeScan은 Nuclei와 ZAP 기반으로 12,000+ 취약점 패턴을 실시간 탐지합니다.',
     images: [
       {
-        url: '/logo.png',
+        url: '/logo2.png',
         alt: 'VibeScan - 웹 보안 점검 서비스',
       },
     ],

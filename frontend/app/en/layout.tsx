@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     siteName: 'VibeScan',
     images: [
       {
-        url: '/logo.png',
+        url: '/logo2.png',
         width: 1200,
         height: 630,
         alt: 'VibeScan - Web Security Scanning Service',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     description: 'Automated security vulnerability scanning and AI analysis service for developers',
     images: [
       {
-        url: '/logo.png',
+        url: '/logo2.png',
         alt: 'VibeScan - Web Security Scanning Service',
       },
     ],

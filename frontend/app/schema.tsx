@@ -5,7 +5,7 @@ export function OrganizationSchema() {
     "name": "silverithm",
     "legalName": "silverithm",
     "url": "https://vibescan.co.kr",
-    "logo": "https://vibescan.co.kr/logo.png",
+    "logo": "https://vibescan.co.kr/logo2.png",
     "description": "Web security vulnerability scanning service for developers",
     "email": "ggprgrkjh2@gmail.com",
     "telephone": "+82-10-4549-2094",
@@ -69,34 +69,187 @@ export function SoftwareApplicationSchema() {
     "name": "VibeScan",
     "operatingSystem": "Web",
     "applicationCategory": "SecurityApplication",
+    "image": "https://vibescan.co.kr/logo2.png",
     "offers": [
       {
         "@type": "Offer",
         "name": "Free Plan",
         "price": "0",
         "priceCurrency": "KRW",
-        "description": "월 1회 스캔, 리포트 미리보기"
+        "description": "월 1회 스캔, 리포트 미리보기",
+        "image": "https://vibescan.co.kr/logo2.png",
+        "availability": "https://schema.org/InStock",
+        "url": "https://vibescan.co.kr/pricing",
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "KR",
+          "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
+          "merchantReturnDays": 0,
+          "returnMethod": "https://schema.org/ReturnByMail",
+          "returnFees": "https://schema.org/FreeReturn"
+        },
+        "shippingDetails": {
+          "@type": "OfferShippingDetails",
+          "shippingRate": {
+            "@type": "MonetaryAmount",
+            "value": "0",
+            "currency": "KRW"
+          },
+          "deliveryTime": {
+            "@type": "ShippingDeliveryTime",
+            "handlingTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 0,
+              "unitCode": "DAY"
+            },
+            "transitTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 0,
+              "unitCode": "DAY"
+            }
+          },
+          "shippingDestination": {
+            "@type": "DefinedRegion",
+            "addressCountry": "KR"
+          }
+        }
       },
       {
         "@type": "Offer",
         "name": "Starter Plan",
         "price": "9900",
         "priceCurrency": "KRW",
-        "description": "월 5회 스캔, 전체 리포트, AI 분석"
+        "description": "월 5회 스캔, 전체 리포트, AI 분석",
+        "image": "https://vibescan.co.kr/logo2.png",
+        "availability": "https://schema.org/InStock",
+        "url": "https://vibescan.co.kr/pricing",
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "KR",
+          "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
+          "merchantReturnDays": 0,
+          "returnMethod": "https://schema.org/ReturnByMail",
+          "returnFees": "https://schema.org/FreeReturn"
+        },
+        "shippingDetails": {
+          "@type": "OfferShippingDetails",
+          "shippingRate": {
+            "@type": "MonetaryAmount",
+            "value": "0",
+            "currency": "KRW"
+          },
+          "deliveryTime": {
+            "@type": "ShippingDeliveryTime",
+            "handlingTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 0,
+              "unitCode": "DAY"
+            },
+            "transitTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 0,
+              "unitCode": "DAY"
+            }
+          },
+          "shippingDestination": {
+            "@type": "DefinedRegion",
+            "addressCountry": "KR"
+          }
+        }
       },
       {
         "@type": "Offer",
         "name": "Pro Plan",
         "price": "29900",
         "priceCurrency": "KRW",
-        "description": "월 10회 스캔, 전체 리포트, AI 분석, 우선 지원"
+        "description": "월 10회 스캔, 전체 리포트, AI 분석, 우선 지원",
+        "image": "https://vibescan.co.kr/logo2.png",
+        "availability": "https://schema.org/InStock",
+        "url": "https://vibescan.co.kr/pricing",
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "KR",
+          "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
+          "merchantReturnDays": 0,
+          "returnMethod": "https://schema.org/ReturnByMail",
+          "returnFees": "https://schema.org/FreeReturn"
+        },
+        "shippingDetails": {
+          "@type": "OfferShippingDetails",
+          "shippingRate": {
+            "@type": "MonetaryAmount",
+            "value": "0",
+            "currency": "KRW"
+          },
+          "deliveryTime": {
+            "@type": "ShippingDeliveryTime",
+            "handlingTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 0,
+              "unitCode": "DAY"
+            },
+            "transitTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 0,
+              "unitCode": "DAY"
+            }
+          },
+          "shippingDestination": {
+            "@type": "DefinedRegion",
+            "addressCountry": "KR"
+          }
+        }
       },
       {
         "@type": "Offer",
         "name": "Business Plan",
         "price": "99900",
         "priceCurrency": "KRW",
-        "description": "월 50회 스캔, 전체 리포트, AI 분석, 전담 지원"
+        "description": "월 50회 스캔, 전체 리포트, AI 분석, 전담 지원",
+        "image": "https://vibescan.co.kr/logo2.png",
+        "availability": "https://schema.org/InStock",
+        "url": "https://vibescan.co.kr/pricing",
+        "hasMerchantReturnPolicy": {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": "KR",
+          "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
+          "merchantReturnDays": 0,
+          "returnMethod": "https://schema.org/ReturnByMail",
+          "returnFees": "https://schema.org/FreeReturn"
+        },
+        "shippingDetails": {
+          "@type": "OfferShippingDetails",
+          "shippingRate": {
+            "@type": "MonetaryAmount",
+            "value": "0",
+            "currency": "KRW"
+          },
+          "deliveryTime": {
+            "@type": "ShippingDeliveryTime",
+            "handlingTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 0,
+              "unitCode": "DAY"
+            },
+            "transitTime": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 0,
+              "unitCode": "DAY"
+            }
+          },
+          "shippingDestination": {
+            "@type": "DefinedRegion",
+            "addressCountry": "KR"
+          }
+        }
       }
     ],
     "aggregateRating": {
