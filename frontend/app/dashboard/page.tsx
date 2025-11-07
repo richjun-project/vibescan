@@ -899,7 +899,8 @@ export default function DashboardPage() {
                 </motion.div>
               </div>
 
-              <div className="flex items-center gap-2 pl-1">
+              {/* Ranking share checkbox - commented out */}
+              {/* <div className="flex items-center gap-2 pl-1">
                 <input
                   type="checkbox"
                   id="ranking-share"
@@ -917,7 +918,7 @@ export default function DashboardPage() {
                 >
                   스캔 결과를 공개 랭킹에 공유하기
                 </label>
-              </div>
+              </div> */}
             </form>
 
             {remainingScans === 0 && (
@@ -933,15 +934,15 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* Ranking Section */}
-        <motion.div
+        {/* Ranking Section - commented out */}
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
           className="mb-12"
         >
           <RankingScroller />
-        </motion.div>
+        </motion.div> */}
 
         {/* Scans List - Enhanced */}
         <motion.div
@@ -1012,12 +1013,13 @@ export default function DashboardPage() {
                             </h3>
                             {getStatusBadge(scan.status)}
                             {scan.status !== 'failed' && scan.grade && getGradeBadge(scan.grade)}
-                            {scan.status === 'completed' && scan.isRankingShared && (
+                            {/* Ranking shared badge - commented out */}
+                            {/* {scan.status === 'completed' && scan.isRankingShared && (
                               <Badge className="bg-gray-900 text-white hover:bg-gray-900 border border-gray-900 flex items-center gap-1">
                                 <TrendingUp className="w-3 h-3" />
                                 랭킹 공개
                               </Badge>
-                            )}
+                            )} */}
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <span>
@@ -1066,7 +1068,8 @@ export default function DashboardPage() {
                           )}
                         </div>
                         <div className="ml-4 flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity relative z-10">
-                          {scan.status === 'completed' && (
+                          {/* Ranking toggle button - commented out */}
+                          {/* {scan.status === 'completed' && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -1085,7 +1088,7 @@ export default function DashboardPage() {
                                 </>
                               )}
                             </Button>
-                          )}
+                          )} */}
                           <motion.div whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
                             <Button variant="ghost" size="sm" className="rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium">
                               상세보기 →

@@ -899,7 +899,8 @@ export default function DashboardPageEN() {
                 </motion.div>
               </div>
 
-              <div className="flex items-center gap-2 pl-1">
+              {/* Ranking share checkbox - commented out */}
+              {/* <div className="flex items-center gap-2 pl-1">
                 <input
                   type="checkbox"
                   id="ranking-share"
@@ -917,7 +918,7 @@ export default function DashboardPageEN() {
                 >
                   Share scan result in public ranking
                 </label>
-              </div>
+              </div> */}
             </form>
 
             {remainingScans === 0 && (
@@ -933,15 +934,15 @@ export default function DashboardPageEN() {
           </div>
         </motion.div>
 
-        {/* Ranking Section */}
-        <motion.div
+        {/* Ranking Section - commented out */}
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
           className="mb-12"
         >
           <RankingScroller lang="en" />
-        </motion.div>
+        </motion.div> */}
 
         {/* Scans List - Enhanced */}
         <motion.div
@@ -1012,13 +1013,15 @@ export default function DashboardPageEN() {
                             </h3>
                             {getStatusBadge(scan.status)}
                             {scan.status !== 'failed' && scan.grade && getGradeBadge(scan.grade)}
-                            {scan.status === 'completed' && scan.isRankingShared && (
+                            {/* Ranking shared badge - commented out */}
+                            {/* {scan.status === 'completed' && scan.isRankingShared && (
                               <Badge className="bg-gray-900 text-white hover:bg-gray-900 border border-gray-900 flex items-center gap-1">
                                 <TrendingUp className="w-3 h-3" />
                                 Ranking Shared
                               </Badge>
-                            )}
-                            {scan.status === 'completed' && (
+                            )} */}
+                            {/* Ranking toggle button - commented out */}
+                            {/* {scan.status === 'completed' && (
                               <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
@@ -1037,7 +1040,7 @@ export default function DashboardPageEN() {
                                   </>
                                 )}
                               </motion.button>
-                            )}
+                            )} */}
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <span>
@@ -1086,7 +1089,8 @@ export default function DashboardPageEN() {
                           )}
                         </div>
                         <div className="ml-4 flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity relative z-10">
-                          {scan.status === 'completed' && (
+                          {/* Ranking toggle button - commented out */}
+                          {/* {scan.status === 'completed' && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -1105,7 +1109,7 @@ export default function DashboardPageEN() {
                                 </>
                               )}
                             </Button>
-                          )}
+                          )} */}
                           <motion.div whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
                             <Button variant="ghost" size="sm" className="rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium">
                               View Details →

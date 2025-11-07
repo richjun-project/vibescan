@@ -235,7 +235,7 @@ export default function HomeEN() {
       </section>
 
       {/* Ranking Section */}
-      <RankingScroller lang="en" />
+      {/* <RankingScroller lang="en" /> */}
 
       {/* Features Section - Apple Style */}
       <section className="container mx-auto px-6 py-20 md:py-32 border-t border-gray-200">
