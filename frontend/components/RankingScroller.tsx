@@ -74,8 +74,10 @@ export default function RankingScroller({ lang = 'ko' }: RankingScrollerProps) {
     )
   }
 
-  // Duplicate rankings for seamless infinite scroll (only 2x to reduce duplication)
-  const duplicatedRankings = [...rankings, ...rankings]
+  // Only duplicate if we have enough items for smooth scrolling (at least 3 items)
+  // If less than 3 items, show them as-is without animation
+  const shouldAnimate = rankings.length >= 3
+  const duplicatedRankings = shouldAnimate ? [...rankings, ...rankings] : rankings
 
   const getGradeBadgeStyle = (grade: string) => {
     switch (grade) {
@@ -104,11 +106,15 @@ export default function RankingScroller({ lang = 'ko' }: RankingScrollerProps) {
       </div>
 
       <div className="relative">
-        {/* Gradient overlays for smooth edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+        {/* Gradient overlays for smooth edges - only show when animating */}
+        {shouldAnimate && (
+          <>
+            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+          </>
+        )}
 
-        <div className="flex gap-4 animate-scroll px-4">
+        <div className={`flex gap-4 px-4 ${shouldAnimate ? 'animate-scroll' : 'justify-center'}`}>
           {duplicatedRankings.map((item, index) => (
             <div
               key={`${item.domain}-${item.rank}-${index}`}
