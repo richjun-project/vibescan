@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog"
 import Link from "next/link"
 import Image from "next/image"
-import { Shield, TrendingUp, Clock, AlertTriangle, Ticket, CreditCard, Sparkles } from "lucide-react"
+import { Shield, TrendingUp, Clock, AlertTriangle, Ticket, CreditCard, Sparkles, Eye, EyeOff } from "lucide-react"
 import { apiClient } from "@/lib/api-client"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -32,6 +32,7 @@ interface Scan {
   grade?: string
   createdAt: string
   completedAt?: string
+  isRankingShared?: boolean
   results?: {
     findingsBySeverity?: {
       critical?: number
@@ -296,6 +297,32 @@ export default function DashboardPage() {
       }
     } finally {
       setCreating(false)
+    }
+  }
+
+  const toggleRankingShared = async (scanId: number, e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    try {
+      const result = await apiClient.toggleRankingShared(scanId)
+
+      // Update local state
+      setScans(scans.map(scan =>
+        scan.id === scanId
+          ? { ...scan, isRankingShared: result.isRankingShared }
+          : scan
+      ))
+
+      toast.success(
+        result.isRankingShared
+          ? "스캔이 공개 랭킹에 공유됩니다"
+          : "스캔이 랭킹에서 비공개 처리됩니다"
+      )
+    } catch (error: any) {
+      toast.error("랭킹 공유 설정 변경 실패", {
+        description: error.message || "잠시 후 다시 시도해주세요"
+      })
     }
   }
 
@@ -985,6 +1012,32 @@ export default function DashboardPage() {
                             </h3>
                             {getStatusBadge(scan.status)}
                             {scan.status !== 'failed' && scan.grade && getGradeBadge(scan.grade)}
+                            {scan.status === 'completed' && scan.isRankingShared && (
+                              <Badge className="bg-gray-900 text-white hover:bg-gray-900 border border-gray-900 flex items-center gap-1">
+                                <TrendingUp className="w-3 h-3" />
+                                랭킹 공개
+                              </Badge>
+                            )}
+                            {scan.status === 'completed' && (
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={(e) => toggleRankingShared(scan.id, e)}
+                                className="ml-auto text-xs px-3 py-1.5 rounded-full bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-900 transition-all font-medium flex items-center gap-1.5"
+                              >
+                                {scan.isRankingShared ? (
+                                  <>
+                                    <EyeOff className="w-3 h-3" />
+                                    비공개로 전환
+                                  </>
+                                ) : (
+                                  <>
+                                    <Eye className="w-3 h-3" />
+                                    랭킹 공유
+                                  </>
+                                )}
+                              </motion.button>
+                            )}
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <span>

@@ -72,6 +72,12 @@ export class ScanController {
     return this.scanService.togglePublic(id, req.user.id);
   }
 
+  @Patch(':id/toggle-ranking-shared')
+  @UseGuards(JwtAuthGuard)
+  async toggleRankingShared(@Request() req, @Param('id') id: number) {
+    return this.scanService.toggleRankingShared(id, req.user.id);
+  }
+
   @Get(':id/json-report')
   @UseGuards(JwtAuthGuard)
   async getJsonReport(@Request() req, @Param('id') id: number) {

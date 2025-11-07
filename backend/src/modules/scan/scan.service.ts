@@ -186,6 +186,33 @@ export class ScanService {
     return scan;
   }
 
+  async toggleRankingShared(scanId: number, userId: number) {
+    const scan = await this.scanRepository.findOneOrFail({ id: scanId, user: userId });
+
+    // Only allow toggling for completed scans
+    if (scan.status !== ScanStatus.COMPLETED) {
+      const message = scan.language === 'en'
+        ? 'Can only share completed scans in ranking'
+        : '완료된 스캔만 랭킹에 공유할 수 있습니다';
+      throw new ForbiddenException(message);
+    }
+
+    scan.isRankingShared = !scan.isRankingShared;
+    await this.em.flush();
+
+    this.logger.log(`[TOGGLE_RANKING] Scan ${scanId} ranking share toggled to ${scan.isRankingShared}`);
+
+    return {
+      success: true,
+      isRankingShared: scan.isRankingShared,
+      scan: {
+        id: scan.id,
+        domain: scan.domain,
+        isRankingShared: scan.isRankingShared,
+      }
+    };
+  }
+
   async getJsonReport(scanId: number, userId: number) {
     const scan = await this.scanRepository.findOneOrFail({ id: scanId, user: userId });
     return scan.jsonReport;

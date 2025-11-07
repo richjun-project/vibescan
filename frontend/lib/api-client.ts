@@ -144,6 +144,12 @@ class APIClient {
     });
   }
 
+  async toggleRankingShared(scanId: number) {
+    return this.request(`/scans/${scanId}/toggle-ranking-shared`, {
+      method: 'PATCH',
+    });
+  }
+
   async getJsonReport(scanId: number) {
     return this.request(`/scans/${scanId}/json-report`, {
       method: 'GET',
