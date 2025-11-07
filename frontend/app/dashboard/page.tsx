@@ -1018,26 +1018,6 @@ export default function DashboardPage() {
                                 랭킹 공개
                               </Badge>
                             )}
-                            {scan.status === 'completed' && (
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={(e) => toggleRankingShared(scan.id, e)}
-                                className="ml-auto text-xs px-3 py-1.5 rounded-full bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-900 transition-all font-medium flex items-center gap-1.5"
-                              >
-                                {scan.isRankingShared ? (
-                                  <>
-                                    <EyeOff className="w-3 h-3" />
-                                    비공개로 전환
-                                  </>
-                                ) : (
-                                  <>
-                                    <Eye className="w-3 h-3" />
-                                    랭킹 공유
-                                  </>
-                                )}
-                              </motion.button>
-                            )}
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <span>
@@ -1085,7 +1065,27 @@ export default function DashboardPage() {
                             </div>
                           )}
                         </div>
-                        <div className="ml-4 opacity-70 group-hover:opacity-100 transition-opacity relative z-10">
+                        <div className="ml-4 flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity relative z-10">
+                          {scan.status === 'completed' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => toggleRankingShared(scan.id, e)}
+                              className="rounded-full bg-white border-2 border-gray-300 hover:border-gray-900 text-gray-700 hover:text-gray-900 font-medium flex items-center gap-1"
+                            >
+                              {scan.isRankingShared ? (
+                                <>
+                                  <EyeOff className="w-3.5 h-3.5" />
+                                  비공개
+                                </>
+                              ) : (
+                                <>
+                                  <Eye className="w-3.5 h-3.5" />
+                                  랭킹 공유
+                                </>
+                              )}
+                            </Button>
+                          )}
                           <motion.div whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
                             <Button variant="ghost" size="sm" className="rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium">
                               상세보기 →

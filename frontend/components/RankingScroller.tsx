@@ -131,8 +131,13 @@ export default function RankingScroller({ lang = 'ko' }: RankingScrollerProps) {
               <div className="text-base font-semibold text-gray-700 truncate">
                 {item.domain}
               </div>
+              {item.score !== undefined && (
+                <div className="text-sm font-bold text-gray-900 mt-2">
+                  {lang === 'ko' ? '점수' : 'Score'}: {item.score}/100
+                </div>
+              )}
               {item.completedAt && (
-                <div className="text-xs text-gray-400 mt-2">
+                <div className="text-xs text-gray-400 mt-1">
                   {new Date(item.completedAt).toLocaleDateString()}
                 </div>
               )}

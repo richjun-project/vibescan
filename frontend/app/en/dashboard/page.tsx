@@ -1085,7 +1085,27 @@ export default function DashboardPageEN() {
                             </div>
                           )}
                         </div>
-                        <div className="ml-4 opacity-70 group-hover:opacity-100 transition-opacity relative z-10">
+                        <div className="ml-4 flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity relative z-10">
+                          {scan.status === 'completed' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => toggleRankingShared(scan.id, e)}
+                              className="rounded-full bg-white border-2 border-gray-300 hover:border-gray-900 text-gray-700 hover:text-gray-900 font-medium flex items-center gap-1"
+                            >
+                              {scan.isRankingShared ? (
+                                <>
+                                  <EyeOff className="w-3.5 h-3.5" />
+                                  Make Private
+                                </>
+                              ) : (
+                                <>
+                                  <Eye className="w-3.5 h-3.5" />
+                                  Share in Ranking
+                                </>
+                              )}
+                            </Button>
+                          )}
                           <motion.div whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 300 }}>
                             <Button variant="ghost" size="sm" className="rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium">
                               View Details →
