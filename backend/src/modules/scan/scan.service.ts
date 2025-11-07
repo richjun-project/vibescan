@@ -31,8 +31,8 @@ export class ScanService {
     private readonly em: EntityManager,
   ) {}
 
-  async createScan(user: User, domain: string, repositoryUrl?: string, language: 'ko' | 'en' = 'ko') {
-    this.logger.log(`[CREATE_SCAN] Starting scan creation for user ${user.id}, domain: ${domain}, language: ${language}`);
+  async createScan(user: User, domain: string, repositoryUrl?: string, language: 'ko' | 'en' = 'ko', isRankingShared: boolean = false) {
+    this.logger.log(`[CREATE_SCAN] Starting scan creation for user ${user.id}, domain: ${domain}, language: ${language}, isRankingShared: ${isRankingShared}`);
 
     // Check if user already has a running scan
     const existingScan = await this.scanRepository.findOne({
@@ -112,6 +112,7 @@ export class ScanService {
       shareToken: crypto.randomBytes(16).toString('hex'),
       isPaid,
       language,
+      isRankingShared,
     });
 
     await this.em.persistAndFlush(scan);
@@ -397,5 +398,32 @@ export class ScanService {
 
     await this.em.flush();
     this.logger.log(`[AI_ENRICH] Completed AI enrichment for scan ${scanId} (${enrichedCount} vulnerabilities enriched)`);
+  }
+
+  async getPublicRankings(limit: number = 50) {
+    this.logger.log(`[GET_PUBLIC_RANKINGS] Fetching public rankings (limit: ${limit})`);
+
+    const scans = await this.scanRepository.find(
+      {
+        isRankingShared: true,
+        status: ScanStatus.COMPLETED,
+      },
+      {
+        orderBy: { completedAt: 'DESC' },
+        limit,
+        fields: ['id', 'domain', 'score', 'grade', 'completedAt'],
+      }
+    );
+
+    const rankings = scans.map((scan, index) => ({
+      rank: index + 1,
+      domain: scan.domain,
+      score: scan.score,
+      grade: scan.grade,
+      completedAt: scan.completedAt,
+    }));
+
+    this.logger.log(`[GET_PUBLIC_RANKINGS] Found ${rankings.length} public scans`);
+    return rankings;
   }
 }

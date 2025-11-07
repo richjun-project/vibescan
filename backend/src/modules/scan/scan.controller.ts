@@ -17,6 +17,10 @@ class CreateScanDto {
   @IsOptional()
   @IsString()
   language?: 'ko' | 'en';
+
+  @IsOptional()
+  @IsBoolean()
+  isRankingShared?: boolean;
 }
 
 @Controller('scans')
@@ -30,7 +34,18 @@ export class ScanController {
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests per minute
   async createScan(@Request() req, @Body() dto: CreateScanDto) {
-    return this.scanService.createScan(req.user, dto.domain, dto.repositoryUrl, dto.language || 'ko');
+    return this.scanService.createScan(req.user, dto.domain, dto.repositoryUrl, dto.language || 'ko', dto.isRankingShared || false);
+  }
+
+  @Get('public/rankings')
+  async getPublicRankings(@Query('limit') limit: string = '50') {
+    const limitNum = parseInt(limit, 10) || 50;
+    return this.scanService.getPublicRankings(limitNum);
+  }
+
+  @Get('public/:shareToken')
+  async getPublicScan(@Param('shareToken') shareToken: string) {
+    return this.scanService.getPublicScan(shareToken);
   }
 
   @Get()
@@ -49,11 +64,6 @@ export class ScanController {
   @UseGuards(JwtAuthGuard)
   async getScan(@Request() req, @Param('id') id: number): Promise<any> {
     return this.scanService.getScanById(id, req.user.id);
-  }
-
-  @Get('public/:shareToken')
-  async getPublicScan(@Param('shareToken') shareToken: string) {
-    return this.scanService.getPublicScan(shareToken);
   }
 
   @Patch(':id/toggle-public')

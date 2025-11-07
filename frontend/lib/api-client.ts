@@ -119,10 +119,10 @@ class APIClient {
   }
 
   // Scan APIs
-  async createScan(domain: string, repositoryUrl?: string, language: 'ko' | 'en' = 'ko') {
+  async createScan(domain: string, repositoryUrl?: string, language: 'ko' | 'en' = 'ko', isRankingShared?: boolean) {
     return this.request('/scans', {
       method: 'POST',
-      body: JSON.stringify({ domain, repositoryUrl, language }),
+      body: JSON.stringify({ domain, repositoryUrl, language, isRankingShared }),
     });
   }
 

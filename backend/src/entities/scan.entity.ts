@@ -60,6 +60,9 @@ export class Scan {
   @Property()
   isPaid: boolean = false; // Free scans show preview only, paid scans show full details
 
+  @Property({ default: false })
+  isRankingShared: boolean = false; // Whether user consents to share scan in public ranking
+
   @Property({ default: 'ko' })
   language: 'ko' | 'en' = 'ko'; // Language for AI analysis
 

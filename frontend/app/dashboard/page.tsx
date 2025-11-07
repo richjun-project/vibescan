@@ -22,6 +22,7 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { motion, useInView, useSpring, useTransform } from "framer-motion"
+import RankingScroller from "@/components/RankingScroller"
 
 interface Scan {
   id: number
@@ -94,6 +95,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
   const [domain, setDomain] = useState("")
+  const [isRankingShared, setIsRankingShared] = useState(false)
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [canceling, setCanceling] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -243,8 +245,9 @@ export default function DashboardPage() {
     setCreating(true)
 
     try {
-      const newScan = await apiClient.createScan(trimmedDomain, undefined, 'ko')
+      const newScan = await apiClient.createScan(trimmedDomain, undefined, 'ko', isRankingShared)
       setDomain("")
+      setIsRankingShared(false)
 
       toast.success("스캔 시작!", {
         description: "스캔 진행 상황 페이지로 이동합니다. 브라우저를 닫아도 스캔은 계속 진행됩니다.",
@@ -823,49 +826,71 @@ export default function DashboardPage() {
           </div>
 
           <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl border-2 border-gray-400 shadow-lg relative z-10">
-            <form onSubmit={createScan} className="flex gap-3">
-              <Input
-                id="domain-input"
-                placeholder="example.com 또는 https://example.com"
-                value={domain}
-                onChange={(e) => setDomain(e.target.value)}
-                required
-                disabled={remainingScans === 0}
-                aria-required="true"
-                aria-describedby="domain-hint"
-                className={cn(
-                  "flex-1 h-14 text-base border-2 rounded-xl px-5 transition-all duration-300",
-                  remainingScans === 0
-                    ? "bg-gray-100 cursor-not-allowed"
-                    : "focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:shadow-lg focus:shadow-blue-200/50"
-                )}
-              />
-              <span id="domain-hint" className="sr-only">
-                스캔할 웹사이트의 도메인 주소를 입력하세요. 예: example.com
-              </span>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button
-                  type="submit"
-                  size="lg"
-                  disabled={creating || remainingScans === 0}
-                  className="px-10 h-14 rounded-full bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 hover:from-blue-700 hover:via-blue-800 hover:to-blue-700 text-white font-bold min-w-[140px] shadow-lg hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300"
-                  style={{
-                    backgroundSize: "200% 100%",
-                    animation: creating ? "shimmer 2s infinite" : undefined
-                  }}
-                  aria-busy={creating}
+            <form onSubmit={createScan} className="space-y-4">
+              <div className="flex gap-3">
+                <Input
+                  id="domain-input"
+                  placeholder="example.com 또는 https://example.com"
+                  value={domain}
+                  onChange={(e) => setDomain(e.target.value)}
+                  required
+                  disabled={remainingScans === 0}
+                  aria-required="true"
+                  aria-describedby="domain-hint"
+                  className={cn(
+                    "flex-1 h-14 text-base border-2 rounded-xl px-5 transition-all duration-300",
+                    remainingScans === 0
+                      ? "bg-gray-100 cursor-not-allowed"
+                      : "focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:shadow-lg focus:shadow-blue-200/50"
+                  )}
+                />
+                <span id="domain-hint" className="sr-only">
+                  스캔할 웹사이트의 도메인 주소를 입력하세요. 예: example.com
+                </span>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  {creating ? (
-                    <>
-                      <span>생성 중...</span>
-                      <span className="sr-only">스캔을 생성하는 중입니다</span>
-                    </>
-                  ) : "스캔 시작"}
-                </Button>
-              </motion.div>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={creating || remainingScans === 0}
+                    className="px-10 h-14 rounded-full bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 hover:from-blue-700 hover:via-blue-800 hover:to-blue-700 text-white font-bold min-w-[140px] shadow-lg hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300"
+                    style={{
+                      backgroundSize: "200% 100%",
+                      animation: creating ? "shimmer 2s infinite" : undefined
+                    }}
+                    aria-busy={creating}
+                  >
+                    {creating ? (
+                      <>
+                        <span>생성 중...</span>
+                        <span className="sr-only">스캔을 생성하는 중입니다</span>
+                      </>
+                    ) : "스캔 시작"}
+                  </Button>
+                </motion.div>
+              </div>
+
+              <div className="flex items-center gap-2 pl-1">
+                <input
+                  type="checkbox"
+                  id="ranking-share"
+                  checked={isRankingShared}
+                  onChange={(e) => setIsRankingShared(e.target.checked)}
+                  disabled={remainingScans === 0}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                <label
+                  htmlFor="ranking-share"
+                  className={cn(
+                    "text-sm font-medium cursor-pointer select-none",
+                    remainingScans === 0 ? "text-gray-400 cursor-not-allowed" : "text-gray-700 hover:text-blue-600"
+                  )}
+                >
+                  스캔 결과를 공개 랭킹에 공유하기
+                </label>
+              </div>
             </form>
 
             {remainingScans === 0 && (
@@ -881,11 +906,21 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* Scans List - Enhanced */}
+        {/* Ranking Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
+          className="mb-12"
+        >
+          <RankingScroller />
+        </motion.div>
+
+        {/* Scans List - Enhanced */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
         >
           <h2 className="text-2xl font-semibold text-gray-900 mb-1">스캔 기록</h2>
           <p className="text-sm text-gray-500 mb-6">

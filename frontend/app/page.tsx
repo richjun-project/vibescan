@@ -9,6 +9,7 @@ import Image from "next/image"
 import { Shield, Zap, Award, ArrowRight, CheckCircle2, Sparkles, TrendingUp, Code, Lock, Rocket, Menu } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import RankingScroller from "@/components/RankingScroller"
 
 export default function Home() {
   const router = useRouter()
@@ -233,6 +234,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Ranking Section */}
+      <RankingScroller />
 
       {/* Features Section - Apple Style */}
       <section className="container mx-auto px-6 py-20 md:py-32 border-t border-gray-200">
