@@ -7,8 +7,6 @@ tags: ["web security", "checklist", "security guide", "developers"]
 image: "/blog/security-checklist.png"
 ---
 
-# Web Security Checklist for Modern Developers
-
 Checking security before production deployment is essential. This guide provides a core security checklist every web developer should know.
 
 ## 1. HTTPS Usage and Forced Redirection

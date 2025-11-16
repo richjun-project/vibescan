@@ -7,8 +7,6 @@ tags: ["OWASP", "웹 보안", "취약점", "보안 가이드"]
 image: "/blog/owasp-top-10.png"
 ---
 
-# OWASP Top 10 취약점 완벽 가이드 (2024)
-
 웹 애플리케이션 보안은 현대 개발에서 가장 중요한 요소 중 하나입니다. OWASP(Open Web Application Security Project)는 매년 가장 위험한 웹 애플리케이션 보안 위험 목록을 발표합니다. 이 가이드에서는 2024년 OWASP Top 10 취약점을 상세히 알아보겠습니다.
 
 ## 1. Broken Access Control (취약한 접근 제어)

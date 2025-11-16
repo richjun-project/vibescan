@@ -7,8 +7,6 @@ tags: ["OWASP", "web security", "vulnerabilities", "security guide"]
 image: "/blog/owasp-top-10.png"
 ---
 
-# Complete Guide to OWASP Top 10 Vulnerabilities (2024)
-
 Web application security is one of the most critical aspects of modern development. The OWASP (Open Web Application Security Project) publishes an annual list of the most dangerous web application security risks. This guide provides an in-depth look at the 2024 OWASP Top 10 vulnerabilities.
 
 ## 1. Broken Access Control

@@ -7,8 +7,6 @@ tags: ["SQL Injection", "database security", "web security", "Node.js"]
 image: "/blog/sql-injection.png"
 ---
 
-# SQL Injection Prevention: Developer's Complete Guide
-
 SQL Injection is one of the oldest and most dangerous web application vulnerabilities. Consistently ranking high in the OWASP Top 10, this attack is still found on many websites today.
 
 ## What is SQL Injection?

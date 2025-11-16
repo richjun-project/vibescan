@@ -7,8 +7,6 @@ tags: ["SQL Injection", "데이터베이스 보안", "웹 보안", "Node.js"]
 image: "/blog/sql-injection.png"
 ---
 
-# SQL Injection 공격 원리와 방어 방법
-
 SQL Injection은 가장 오래되고 위험한 웹 애플리케이션 취약점 중 하나입니다. OWASP Top 10에서 지속적으로 상위권에 랭크되는 이 공격은 여전히 많은 웹사이트에서 발견되고 있습니다.
 
 ## SQL Injection이란?
