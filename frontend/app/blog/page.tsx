@@ -1,0 +1,166 @@
+import Link from "next/link"
+import Image from "next/image"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { ArrowRight, Calendar, Clock } from "lucide-react"
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '블로그 - VibeScan 보안 가이드',
+  description: '웹 보안, 취약점 스캔, OWASP Top 10에 대한 실용적인 가이드와 튜토리얼을 제공합니다.',
+  openGraph: {
+    title: '블로그 - VibeScan 보안 가이드',
+    description: '웹 보안, 취약점 스캔, OWASP Top 10에 대한 실용적인 가이드와 튜토리얼을 제공합니다.',
+  }
+}
+
+const blogPosts = [
+  {
+    slug: "owasp-top-10-guide",
+    title: "OWASP Top 10 취약점 완벽 가이드 (2024)",
+    description: "웹 애플리케이션의 가장 위험한 10가지 보안 취약점을 알아보고, 각 취약점을 예방하는 방법을 상세히 설명합니다.",
+    date: "2025-01-17",
+    readTime: "15분",
+    image: "/blog/owasp-top-10.png",
+    tags: ["OWASP", "웹 보안", "취약점"]
+  },
+  {
+    slug: "sql-injection-prevention",
+    title: "SQL Injection 공격 원리와 방어 방법",
+    description: "SQL Injection 공격이 무엇인지, 어떻게 작동하는지, 그리고 Node.js 애플리케이션에서 어떻게 방어할 수 있는지 완벽 가이드를 제공합니다.",
+    date: "2025-01-17",
+    readTime: "12분",
+    image: "/blog/sql-injection.png",
+    tags: ["SQL Injection", "데이터베이스 보안", "Node.js"]
+  },
+  {
+    slug: "web-security-checklist",
+    title: "개발자가 알아야 할 웹 보안 체크리스트 10가지",
+    description: "프로덕션 배포 전 반드시 확인해야 할 웹 보안 체크리스트를 제공합니다. 각 항목별 구체적인 구현 방법과 코드 예제를 포함합니다.",
+    date: "2025-01-17",
+    readTime: "18분",
+    image: "/blog/security-checklist.png",
+    tags: ["웹 보안", "체크리스트", "개발자"]
+  }
+]
+
+export default function BlogPage() {
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-3">
+          <nav className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <Image
+                src="/logo.png"
+                alt="VibeScan 로고"
+                width={32}
+                height={32}
+                className="w-8 h-8"
+              />
+              <span className="text-xl font-semibold text-gray-900">VibeScan</span>
+            </Link>
+            <div className="flex items-center gap-6">
+              <Link href="/blog" className="text-sm text-gray-900 hover:text-gray-600">
+                블로그
+              </Link>
+              <Link href="/pricing" className="text-sm text-gray-900 hover:text-gray-600">
+                요금제
+              </Link>
+              <Link href="/">
+                <Button size="sm" variant="ghost">홈으로</Button>
+              </Link>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="container mx-auto px-6 py-16">
+        <div className="max-w-3xl">
+          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+            보안 블로그
+          </h1>
+          <p className="text-xl text-gray-600">
+            웹 보안, 취약점 스캔, OWASP Top 10에 대한 실용적인 가이드와 튜토리얼
+          </p>
+        </div>
+      </section>
+
+      {/* Blog Posts Grid */}
+      <section className="container mx-auto px-6 py-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl">
+          {blogPosts.map((post) => (
+            <Link key={post.slug} href={`/blog/${post.slug}`}>
+              <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
+                <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 relative">
+                  <div className="absolute inset-0 flex items-center justify-center text-white text-2xl font-bold">
+                    {post.title.substring(0, 20)}...
+                  </div>
+                </div>
+                <div className="p-6 flex-1 flex flex-col">
+                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      {post.date}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      {post.readTime}
+                    </div>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+                    {post.title}
+                  </h2>
+                  <p className="text-gray-600 mb-4 line-clamp-3 flex-1">
+                    {post.description}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center text-blue-600 font-semibold">
+                    자세히 보기
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="container mx-auto px-6 py-20">
+        <Card className="p-12 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center">
+          <h2 className="text-3xl font-bold mb-4">
+            지금 VibeScan으로 보안 스캔을 시작하세요
+          </h2>
+          <p className="text-xl mb-8 opacity-90">
+            12,000+ 취약점 패턴을 5분 안에 자동 검사
+          </p>
+          <Link href="/register">
+            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
+              무료로 시작하기
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </Link>
+        </Card>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200 bg-gray-50 py-12">
+        <div className="container mx-auto px-6 text-center text-gray-600">
+          <p>© 2025 VibeScan by silverithm. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  )
+}

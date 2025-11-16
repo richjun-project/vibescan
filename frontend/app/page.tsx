@@ -100,6 +100,9 @@ export default function Home() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
+              <Link href="/blog" className="text-sm text-gray-900 hover:text-gray-600 transition-colors">
+                블로그
+              </Link>
               <Link href="/pricing" className="text-sm text-gray-900 hover:text-gray-600 transition-colors">
                 요금제
               </Link>
@@ -144,6 +147,12 @@ export default function Home() {
                   <SheetTitle>메뉴</SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col gap-4 mt-6">
+                  <Link
+                    href="/blog"
+                    className="text-base text-gray-900 hover:text-gray-600 transition-colors py-2 px-4 hover:bg-gray-100 rounded-lg"
+                  >
+                    블로그
+                  </Link>
                   <Link
                     href="/pricing"
                     className="text-base text-gray-900 hover:text-gray-600 transition-colors py-2 px-4 hover:bg-gray-100 rounded-lg"

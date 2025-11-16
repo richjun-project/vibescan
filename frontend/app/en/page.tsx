@@ -99,6 +99,9 @@ export default function HomeEN() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
+              <Link href="/en/blog" className="text-sm text-gray-900 hover:text-gray-600 transition-colors">
+                Blog
+              </Link>
               <Link href="/en/pricing" className="text-sm text-gray-900 hover:text-gray-600 transition-colors">
                 Pricing
               </Link>
@@ -143,6 +146,12 @@ export default function HomeEN() {
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col gap-4 mt-6">
+                  <Link
+                    href="/en/blog"
+                    className="text-base text-gray-900 hover:text-gray-600 transition-colors py-2 px-4 hover:bg-gray-100 rounded-lg"
+                  >
+                    Blog
+                  </Link>
                   <Link
                     href="/en/pricing"
                     className="text-base text-gray-900 hover:text-gray-600 transition-colors py-2 px-4 hover:bg-gray-100 rounded-lg"
