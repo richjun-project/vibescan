@@ -42,13 +42,6 @@ export function PricingSchema({ plans, language }: PricingSchemaProps) {
         },
         "itemCondition": "https://schema.org/NewCondition"
       },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "reviewCount": "127",
-        "bestRating": "5",
-        "worstRating": "1"
-      },
       "category": "Web Security Software"
     }))
 
@@ -66,12 +59,7 @@ export function PricingSchema({ plans, language }: PricingSchemaProps) {
         "priceCurrency": "KRW",
         "billingIncrement": "P1M",
         "priceValidUntil": "2025-12-31"
-      })),
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "reviewCount": "127"
-      }
+      }))
     }
 
     // BreadcrumbList schema

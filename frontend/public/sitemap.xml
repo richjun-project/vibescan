@@ -7,7 +7,7 @@
     <xhtml:link rel="alternate" hreflang="ko-KR" href="https://vibescan.co.kr/"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://vibescan.co.kr/en"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://vibescan.co.kr/"/>
-    <lastmod>2025-10-20</lastmod>
+    <lastmod>2025-01-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -18,7 +18,7 @@
     <xhtml:link rel="alternate" hreflang="en-US" href="https://vibescan.co.kr/en"/>
     <xhtml:link rel="alternate" hreflang="ko-KR" href="https://vibescan.co.kr/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://vibescan.co.kr/"/>
-    <lastmod>2025-10-20</lastmod>
+    <lastmod>2025-01-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -28,7 +28,7 @@
     <loc>https://vibescan.co.kr/pricing</loc>
     <xhtml:link rel="alternate" hreflang="ko-KR" href="https://vibescan.co.kr/pricing"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://vibescan.co.kr/en/pricing"/>
-    <lastmod>2025-10-20</lastmod>
+    <lastmod>2025-01-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -38,15 +38,31 @@
     <loc>https://vibescan.co.kr/en/pricing</loc>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://vibescan.co.kr/en/pricing"/>
     <xhtml:link rel="alternate" hreflang="ko-KR" href="https://vibescan.co.kr/pricing"/>
-    <lastmod>2025-10-20</lastmod>
+    <lastmod>2025-01-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
+  </url>
+
+  <!-- Privacy Policy Page -->
+  <url>
+    <loc>https://vibescan.co.kr/privacy</loc>
+    <lastmod>2025-01-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Terms of Service Page -->
+  <url>
+    <loc>https://vibescan.co.kr/terms</loc>
+    <lastmod>2025-01-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
   </url>
 
   <!-- Login Page -->
   <url>
     <loc>https://vibescan.co.kr/login</loc>
-    <lastmod>2025-10-20</lastmod>
+    <lastmod>2025-01-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -54,7 +70,51 @@
   <!-- Register Page -->
   <url>
     <loc>https://vibescan.co.kr/register</loc>
-    <lastmod>2025-10-20</lastmod>
+    <lastmod>2025-01-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Korean Blog Posts -->
+  <url>
+    <loc>https://vibescan.co.kr/blog/owasp-top-10-guide</loc>
+    <lastmod>2025-01-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://vibescan.co.kr/blog/sql-injection-prevention</loc>
+    <lastmod>2025-01-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://vibescan.co.kr/blog/web-security-checklist</loc>
+    <lastmod>2025-01-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- English Blog Posts -->
+  <url>
+    <loc>https://vibescan.co.kr/en/blog/owasp-top-10-guide</loc>
+    <lastmod>2025-01-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://vibescan.co.kr/en/blog/sql-injection-prevention</loc>
+    <lastmod>2025-01-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://vibescan.co.kr/en/blog/web-security-checklist</loc>
+    <lastmod>2025-01-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -252,13 +252,6 @@ export function SoftwareApplicationSchema() {
         }
       }
     ],
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "reviewCount": "47",
-      "bestRating": "5",
-      "worstRating": "1"
-    },
     "featureList": [
       "12,000+ 취약점 패턴",
       "실시간 웹 취약점 스캐닝",

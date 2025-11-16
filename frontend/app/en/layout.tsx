@@ -7,11 +7,11 @@ export const metadata: Metadata = {
   keywords: ['web security', 'vulnerability scanning', 'security audit', 'OWASP', 'Nuclei', 'ZAP', 'penetration testing', 'DevSecOps', 'security scanner', 'vulnerability assessment'],
   authors: [{ name: 'silverithm' }],
   alternates: {
-    canonical: '/en',
+    canonical: 'https://vibescan.co.kr/en',
     languages: {
-      'ko-KR': '/',
-      'en-US': '/en',
-      'x-default': '/',
+      'ko-KR': 'https://vibescan.co.kr/',
+      'en-US': 'https://vibescan.co.kr/en',
+      'x-default': 'https://vibescan.co.kr/',
     },
   },
   openGraph: {

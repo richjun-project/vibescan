@@ -21,11 +21,11 @@ export const metadata: Metadata = {
     apple: '/logo.png',
   },
   alternates: {
-    canonical: '/',
+    canonical: 'https://vibescan.co.kr/',
     languages: {
-      'ko-KR': '/',
-      'en-US': '/en',
-      'x-default': '/',
+      'ko-KR': 'https://vibescan.co.kr/',
+      'en-US': 'https://vibescan.co.kr/en',
+      'x-default': 'https://vibescan.co.kr/',
     },
   },
   openGraph: {

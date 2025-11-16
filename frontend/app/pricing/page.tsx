@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { BreadcrumbSchema } from '@/app/schema'
 import { PricingSchema } from '@/components/pricing-schema'
+import { FAQSchema } from '@/components/faq-schema'
 
 const SUBSCRIPTION_PLANS = [
   {
@@ -172,6 +173,17 @@ export default function PricingPage() {
     router.push("/")
   }
 
+  const faqs = [
+    {
+      question: "구독은 언제든지 취소할 수 있나요?",
+      answer: "네, 언제든지 구독을 취소할 수 있습니다. 취소 시 다음 결제일까지 서비스를 계속 이용하실 수 있습니다."
+    },
+    {
+      question: "플랜을 중간에 변경할 수 있나요?",
+      answer: "네, 대시보드에서 언제든지 플랜을 업그레이드하거나 다운그레이드할 수 있습니다."
+    }
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       <BreadcrumbSchema
@@ -181,6 +193,7 @@ export default function PricingPage() {
         ]}
       />
       <PricingSchema plans={SUBSCRIPTION_PLANS} language="ko" />
+      <FAQSchema faqs={faqs} />
       {/* Header */}
       <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
@@ -188,7 +201,7 @@ export default function PricingPage() {
             <Link href="/" className="flex items-center gap-2">
               <Image
                 src="/logo.png"
-                alt="VibeScan - AI 기반 웹 보안 취약점 스캔 서비스 로고"
+                alt="VibeScan 로고"
                 width={32}
                 height={32}
                 priority

@@ -8,6 +8,9 @@ import Image from "next/image"
 import { Check, ArrowRight, Sparkles, Shield, Zap, Building2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { BreadcrumbSchema } from '@/app/schema'
+import { PricingSchema } from '@/components/pricing-schema'
+import { FAQSchema } from '@/components/faq-schema'
 
 const SUBSCRIPTION_PLANS = [
   {
@@ -170,8 +173,27 @@ export default function PricingPageEN() {
     router.push("/en")
   }
 
+  const faqs = [
+    {
+      question: "Can I cancel my subscription at any time?",
+      answer: "Yes, you can cancel your subscription at any time. After cancellation, you can continue using the service until your next billing date."
+    },
+    {
+      question: "Can I change my plan mid-subscription?",
+      answer: "Yes, you can upgrade or downgrade your plan at any time from the dashboard."
+    }
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: 'https://vibescan.co.kr/en' },
+          { name: 'Pricing', url: 'https://vibescan.co.kr/en/pricing' }
+        ]}
+      />
+      <PricingSchema plans={SUBSCRIPTION_PLANS} language="en" />
+      <FAQSchema faqs={faqs} />
       {/* Header */}
       <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
