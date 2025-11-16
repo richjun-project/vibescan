@@ -192,21 +192,21 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         {/* Article Content */}
         <div className="prose prose-base max-w-none
           prose-headings:text-gray-900 prose-headings:font-bold prose-headings:leading-tight
-          prose-h1:text-3xl prose-h1:mt-12 prose-h1:mb-6
-          prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-5 prose-h2:pb-2 prose-h2:border-b prose-h2:border-gray-200
-          prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4
-          prose-h4:text-lg prose-h4:mt-6 prose-h4:mb-3
-          prose-p:text-gray-700 prose-p:text-base prose-p:leading-[1.8] prose-p:mb-5
+          prose-h1:text-3xl prose-h1:mt-16 prose-h1:mb-6
+          prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-6 prose-h2:pb-3 prose-h2:border-b prose-h2:border-gray-200
+          prose-h3:text-xl prose-h3:mt-10 prose-h3:mb-4
+          prose-h4:text-lg prose-h4:mt-8 prose-h4:mb-3
+          prose-p:text-gray-700 prose-p:text-base prose-p:leading-[1.8] prose-p:mb-6
           prose-a:text-gray-900 prose-a:underline prose-a:decoration-gray-400 hover:prose-a:decoration-gray-900
           prose-strong:text-gray-900 prose-strong:font-semibold
           prose-code:text-gray-900 prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none prose-code:font-mono
-          prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-5 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-pre:text-sm prose-pre:my-6 prose-pre:leading-[1.6]
-          prose-ul:list-disc prose-ul:pl-6 prose-ul:mb-5 prose-ul:space-y-2
-          prose-ol:list-decimal prose-ol:pl-6 prose-ol:mb-5 prose-ol:space-y-2
+          prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-5 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-pre:text-sm prose-pre:my-8 prose-pre:leading-[1.6]
+          prose-ul:list-disc prose-ul:pl-6 prose-ul:mb-6 prose-ul:space-y-2
+          prose-ol:list-decimal prose-ol:pl-6 prose-ol:mb-6 prose-ol:space-y-2
           prose-li:text-gray-700 prose-li:text-base prose-li:leading-[1.7]
-          prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-5 prose-blockquote:py-2 prose-blockquote:my-6 prose-blockquote:italic prose-blockquote:text-gray-600
-          prose-img:rounded-lg prose-img:shadow-lg prose-img:my-8
-          prose-hr:border-gray-200 prose-hr:my-8"
+          prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-5 prose-blockquote:py-2 prose-blockquote:my-8 prose-blockquote:italic prose-blockquote:text-gray-600
+          prose-img:rounded-lg prose-img:shadow-lg prose-img:my-10
+          prose-hr:border-gray-200 prose-hr:my-10"
         >
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
