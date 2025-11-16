@@ -190,19 +190,21 @@ export default async function BlogPostPageEN({ params }: { params: Promise<{ slu
         </header>
 
         {/* Article Content */}
-        <div className="prose prose-lg max-w-none
-          prose-headings:text-gray-900 prose-headings:font-bold
-          prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6
-          prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4
-          prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6
-          prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+        <div className="prose prose-base max-w-none
+          prose-headings:text-gray-900 prose-headings:font-bold prose-headings:leading-tight
+          prose-h1:text-3xl prose-h1:mt-8 prose-h1:mb-4
+          prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4
+          prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3
+          prose-h4:text-lg prose-h4:mt-4 prose-h4:mb-2
+          prose-p:text-gray-700 prose-p:text-base prose-p:leading-relaxed prose-p:mb-4
+          prose-a:text-gray-900 prose-a:underline prose-a:decoration-gray-400 hover:prose-a:decoration-gray-900
           prose-strong:text-gray-900 prose-strong:font-semibold
-          prose-code:text-blue-600 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
-          prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-6 prose-pre:rounded-lg prose-pre:overflow-x-auto
-          prose-ul:list-disc prose-ul:pl-6 prose-ul:mb-6
-          prose-ol:list-decimal prose-ol:pl-6 prose-ol:mb-6
-          prose-li:text-gray-700 prose-li:mb-2
-          prose-blockquote:border-l-4 prose-blockquote:border-blue-600 prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-gray-700
+          prose-code:text-gray-900 prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
+          prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-pre:text-sm
+          prose-ul:list-disc prose-ul:pl-6 prose-ul:mb-4 prose-ul:space-y-1
+          prose-ol:list-decimal prose-ol:pl-6 prose-ol:mb-4 prose-ol:space-y-1
+          prose-li:text-gray-700 prose-li:text-base prose-li:leading-relaxed
+          prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-600
           prose-img:rounded-lg prose-img:shadow-lg"
         >
           <ReactMarkdown
@@ -260,15 +262,15 @@ export default async function BlogPostPageEN({ params }: { params: Promise<{ slu
 
       {/* CTA Section */}
       <section className="container mx-auto px-6 py-20">
-        <div className="p-12 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center rounded-2xl">
+        <div className="p-12 bg-gray-900 text-white text-center rounded-2xl border-2 border-gray-800">
           <h2 className="text-3xl font-bold mb-4">
             Start Security Scanning with VibeScan Now
           </h2>
-          <p className="text-xl mb-8 opacity-90">
+          <p className="text-xl mb-8 text-gray-300">
             Automatically scan 12,000+ vulnerability patterns in 5 minutes
           </p>
           <Link href="/en/register">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
+            <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-200">
               Get Started for Free
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
