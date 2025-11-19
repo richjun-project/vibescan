@@ -3,67 +3,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Calendar, Clock, ArrowLeft, ArrowRight } from 'lucide-react'
-import fs from 'fs'
-import path from 'path'
-import matter from 'gray-matter'
+
 import { Metadata } from 'next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import 'highlight.js/styles/github-dark.css'
 
-interface BlogPost {
-  slug: string
-  title: string
-  description: string
-  date: string
-  author: string
-  tags: string[]
-  image: string
-  content: string
-  readTime: string
-}
-
-function getPost(slug: string): BlogPost | null {
-  try {
-    const filePath = path.join(process.cwd(), 'content', 'blog', 'ko', `${slug}.md`)
-    const fileContents = fs.readFileSync(filePath, 'utf8')
-    const { data, content } = matter(fileContents)
-
-    // Calculate read time (assuming 200 words per minute)
-    const wordCount = content.split(/\s+/g).length
-    const readTime = Math.ceil(wordCount / 200)
-
-    return {
-      slug,
-      title: data.title,
-      description: data.description,
-      date: data.date,
-      author: data.author,
-      tags: data.tags,
-      image: data.image,
-      content,
-      readTime: `${readTime}분`
-    }
-  } catch (error) {
-    return null
-  }
-}
-
-function getAllPosts(): BlogPost[] {
-  const postsDirectory = path.join(process.cwd(), 'content', 'blog', 'ko')
-  const filenames = fs.readdirSync(postsDirectory)
-
-  const posts = filenames
-    .filter(filename => filename.endsWith('.md'))
-    .map(filename => {
-      const slug = filename.replace(/\.md$/, '')
-      return getPost(slug)
-    })
-    .filter((post): post is BlogPost => post !== null)
-
-  return posts
-}
+import { getPost, getAllPosts, BlogPost } from '@/lib/blog'
 
 export async function generateStaticParams() {
   const posts = getAllPosts()

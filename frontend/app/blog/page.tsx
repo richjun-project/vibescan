@@ -14,37 +14,10 @@ export const metadata: Metadata = {
   }
 }
 
-const blogPosts = [
-  {
-    slug: "owasp-top-10-guide",
-    title: "OWASP Top 10 취약점 완벽 가이드 (2024)",
-    description: "웹 애플리케이션의 가장 위험한 10가지 보안 취약점을 알아보고, 각 취약점을 예방하는 방법을 상세히 설명합니다.",
-    date: "2025-01-17",
-    readTime: "15분",
-    image: "/blog/owasp-top-10.png",
-    tags: ["OWASP", "웹 보안", "취약점"]
-  },
-  {
-    slug: "sql-injection-prevention",
-    title: "SQL Injection 공격 원리와 방어 방법",
-    description: "SQL Injection 공격이 무엇인지, 어떻게 작동하는지, 그리고 Node.js 애플리케이션에서 어떻게 방어할 수 있는지 완벽 가이드를 제공합니다.",
-    date: "2025-01-17",
-    readTime: "12분",
-    image: "/blog/sql-injection.png",
-    tags: ["SQL Injection", "데이터베이스 보안", "Node.js"]
-  },
-  {
-    slug: "web-security-checklist",
-    title: "개발자가 알아야 할 웹 보안 체크리스트 10가지",
-    description: "프로덕션 배포 전 반드시 확인해야 할 웹 보안 체크리스트를 제공합니다. 각 항목별 구체적인 구현 방법과 코드 예제를 포함합니다.",
-    date: "2025-01-17",
-    readTime: "18분",
-    image: "/blog/security-checklist.png",
-    tags: ["웹 보안", "체크리스트", "개발자"]
-  }
-]
+import { getAllPosts } from "@/lib/blog"
 
 export default function BlogPage() {
+  const blogPosts = getAllPosts()
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}

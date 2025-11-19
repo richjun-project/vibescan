@@ -1,7 +1,5 @@
-# Allow all crawlers
 User-agent: *
 Allow: /
-Allow: /en
 
 # Disallow private/sensitive pages
 Disallow: /dashboard
